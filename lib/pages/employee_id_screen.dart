@@ -1,48 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import './widgets/pin_input.dart';
-import 'profile_screen.dart'; // Add this import
+import 'login_screen.dart';
+import '../widgets/styled_button.dart';
 
-class LoginScreen extends StatefulWidget {
-  final String userName;
-  final String employeeId;
-
-  LoginScreen({Key? key, required this.userName, required this.employeeId})
-      : super(key: key);
+class EmployeeIdScreen extends StatefulWidget {
+  const EmployeeIdScreen({Key? key}) : super(key: key);
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _EmployeeIdScreenState createState() => _EmployeeIdScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
+  final TextEditingController _controller = TextEditingController();
+  bool _isFocused = false;
   bool _isDialogShowing = false;
 
-  Future<void> _login(String pin, BuildContext context) async {
+  Future<void> _checkEmployeeId(BuildContext context) async {
     if (_isDialogShowing) return;
 
+    final employeeId = _controller.text;
     try {
-      final int parsedPin = int.parse(pin);
       final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('users')
-          .where('EmployeeID', isEqualTo: widget.employeeId)
-          .where('pin', isEqualTo: parsedPin)
+          .where('EmployeeID', isEqualTo: employeeId)
           .get();
       final List<DocumentSnapshot> documents = result.docs;
       if (documents.isNotEmpty) {
+        // Employee ID found, proceed to login screen
         final user = documents.first.data() as Map<String, dynamic>?;
         if (user != null) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ProfileScreen()),
+            MaterialPageRoute(
+              builder: (context) =>
+                  LoginScreen(userName: user['name'], employeeId: employeeId),
+            ),
           );
         } else {
           _showDialog(context, 'Error', 'User data is null');
         }
       } else {
-        _showDialog(context, 'Error', 'Invalid PIN');
+        // Employee ID not found, show error dialog
+        _showDialog(context, 'Error', 'Invalid Employee ID');
       }
     } catch (e) {
-      _showDialog(context, 'Error', 'Error logging in: $e');
+      _showDialog(context, 'Error', 'Error checking Employee ID: $e');
     }
   }
 
@@ -101,43 +103,48 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                            Center(
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Welcome ${widget.userName}',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: 0.2,
-                                      fontFamily: 'Inter',
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    'Enter PIN to proceed.',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                      letterSpacing: 0.2,
-                                      fontFamily: 'Inter',
-                                    ),
-                                  ),
-                                ],
+                            const Text(
+                              'Enter Employee ID',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.2,
+                                fontFamily: 'Inter',
                               ),
                             ),
                             const SizedBox(height: 20),
-                            Center(
-                              child: PinInput(
-                                onChanged: (pin) {
-                                  if (pin.length == 6) {
-                                    _login(pin, context);
-                                  }
-                                },
-                                onSubmit: (pin) {
-                                  _login(pin, context);
-                                },
+                            Focus(
+                              onFocusChange: (hasFocus) {
+                                setState(() {
+                                  _isFocused = hasFocus;
+                                });
+                              },
+                              child: TextField(
+                                controller: _controller,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.transparent,
+                                  hintText: 'Employee ID',
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: _isFocused
+                                          ? const Color(0xFFD6C35C)
+                                          : const Color(0xFFFFF55E),
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
                               ),
+                            ),
+                            const SizedBox(height: 20),
+                            StyledButton(
+                              text: 'Next',
+                              onPressed: () {
+                                _checkEmployeeId(context);
+                              },
                             ),
                           ],
                         ),

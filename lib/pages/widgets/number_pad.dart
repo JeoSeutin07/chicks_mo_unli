@@ -5,8 +5,7 @@ class NumberPad extends StatefulWidget {
   final Function() onBackspace;
 
   const NumberPad(
-      {Key? key, required this.onNumberSelected, required this.onBackspace})
-      : super(key: key);
+      {super.key, required this.onNumberSelected, required this.onBackspace});
 
   @override
   _NumberPadState createState() => _NumberPadState();

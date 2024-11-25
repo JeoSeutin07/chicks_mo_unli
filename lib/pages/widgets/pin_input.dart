@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'number_pad.dart';
 
 class PinInput extends StatefulWidget {
-  const PinInput({Key? key}) : super(key: key);
+  const PinInput({super.key});
 
   @override
   _PinInputState createState() => _PinInputState();
@@ -65,7 +65,7 @@ class _PinInputState extends State<PinInput> {
                   (index) => Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     child: _pin[index].isNotEmpty && !_isObscured
-                        ? Container(
+                        ? SizedBox(
                             width: 15,
                             height: 15,
                             child: Center(
