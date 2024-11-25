@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthProvider with ChangeNotifier {
-  String _username = '';
+  String _username = 'Nhel Jean';
   String _token = '';
   String _employeeId = '';
   String _pin = '';
-  String _name = '';
+  String _name = 'Palima';
   String _userType = '';
   String _facebook = '';
   String _email = '';

@@ -5,7 +5,8 @@ class NumberPad extends StatefulWidget {
   final Function() onBackspace;
 
   const NumberPad(
-      {super.key, required this.onNumberSelected, required this.onBackspace});
+      {Key? key, required this.onNumberSelected, required this.onBackspace})
+      : super(key: key);
 
   @override
   _NumberPadState createState() => _NumberPadState();
@@ -13,6 +14,7 @@ class NumberPad extends StatefulWidget {
 
 class _NumberPadState extends State<NumberPad> {
   String _pressedButton = '';
+  String _pressedSpecialButton = '';
 
   Widget _buildNumberButton(String number) {
     return GestureDetector(
@@ -60,12 +62,24 @@ class _NumberPadState extends State<NumberPad> {
 
   Widget _buildBackspaceButton() {
     return GestureDetector(
-      onTap: widget.onBackspace,
+      onTapDown: (_) {
+        setState(() {
+          _pressedSpecialButton = 'backspace';
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          _pressedSpecialButton = '';
+        });
+        widget.onBackspace();
+      },
       child: Container(
         width: 60,
         height: 60,
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF55E),
+          color: _pressedSpecialButton == 'backspace'
+              ? const Color(0xFFD6C35C)
+              : const Color(0xFFFFF55E),
           borderRadius: BorderRadius.circular(8),
           boxShadow: const [
             BoxShadow(
@@ -78,6 +92,46 @@ class _NumberPadState extends State<NumberPad> {
         child: const Center(
           child: Icon(
             Icons.backspace,
+            size: 24,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return GestureDetector(
+      onTapDown: (_) {
+        setState(() {
+          _pressedSpecialButton = 'submit';
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          _pressedSpecialButton = '';
+        });
+        // Define the submit action here
+      },
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: _pressedSpecialButton == 'submit'
+              ? const Color(0xFFD6C35C)
+              : const Color(0xFFFFF55E),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x40000000),
+              offset: Offset(0, 4),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.check,
             size: 24,
             color: Colors.black,
           ),
@@ -123,9 +177,9 @@ class _NumberPadState extends State<NumberPad> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(width: 60), // Spacer to match the spacing
-                _buildNumberButton('0'),
                 _buildBackspaceButton(),
+                _buildNumberButton('0'),
+                _buildSubmitButton(),
               ],
             ),
           ],
