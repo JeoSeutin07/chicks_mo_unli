@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'number_pad.dart';
 
 class PinInput extends StatefulWidget {
-  const PinInput({super.key});
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmit;
+
+  const PinInput({super.key, this.onChanged, this.onSubmit});
 
   @override
   _PinInputState createState() => _PinInputState();
@@ -25,6 +28,7 @@ class _PinInputState extends State<PinInput> {
         _pin[_currentIndex] = number;
         _currentIndex++;
       });
+      _notifyChange();
     }
   }
 
@@ -34,6 +38,15 @@ class _PinInputState extends State<PinInput> {
         _currentIndex--;
         _pin[_currentIndex] = '';
       });
+      _notifyChange();
+    }
+  }
+
+  void _notifyChange() {
+    final pinString = _pin.join();
+    widget.onChanged?.call(pinString);
+    if (pinString.length == 6) {
+      widget.onSubmit?.call(pinString);
     }
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ClockInSection extends StatelessWidget {
   final String id;
 
-  ClockInSection({required this.id});
+  const ClockInSection({super.key, required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,6 @@ class ClockInSection extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {},
-            child: Text('Set Up Account'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFFBD663),
               minimumSize: Size(258, 31),
@@ -21,6 +20,7 @@ class ClockInSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
+            child: Text('Set Up Account'),
           ),
           SizedBox(height: 5),
           Container(
@@ -49,7 +49,6 @@ class ClockInSection extends StatelessWidget {
           SizedBox(height: 128),
           ElevatedButton(
             onPressed: () {},
-            child: Text('Log out'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFF9A825),
               minimumSize: Size(359, 51),
@@ -57,6 +56,7 @@ class ClockInSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
+            child: Text('Log out'),
           ),
         ],
       ),

@@ -8,7 +8,7 @@ class ProfileInfo extends StatelessWidget {
   final String facebook;
 
   // Constructor to accept these parameters
-  ProfileInfo({
+  const ProfileInfo({super.key, 
     required this.id,
     required this.type,
     required this.phone,
