@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 class ProfileHeader extends StatelessWidget {
   final String userName;
 
-  ProfileHeader({required this.userName});
+  const ProfileHeader({super.key, required this.userName});
 
   @override
   Widget build(BuildContext context) {
