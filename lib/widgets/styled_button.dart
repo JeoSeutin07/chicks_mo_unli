@@ -4,8 +4,7 @@ class StyledButton extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
 
-  const StyledButton({Key? key, required this.text, required this.onPressed})
-      : super(key: key);
+  const StyledButton({super.key, required this.text, required this.onPressed});
 
   @override
   _StyledButtonState createState() => _StyledButtonState();
