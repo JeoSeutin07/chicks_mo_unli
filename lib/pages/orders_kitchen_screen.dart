@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'widgets/header_widget.dart';
+import 'widgets/employee_header.dart';
 import 'widgets/search_bar_widget.dart';
 import 'widgets/tickets_widget.dart';
 import 'widgets/menu_tabs_widget.dart';
 import '../widgets/navigation_bar.dart' as custom;
 
 class OrdersKitchenScreen extends StatelessWidget {
-  const OrdersKitchenScreen({Key? key}) : super(key: key);
+  const OrdersKitchenScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,12 +15,16 @@ class OrdersKitchenScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const HeaderWidget(),
+              EmployeeHeader(
+                employeeName: 'John Doe', // Example employee name
+                currentTime: DateTime.now(), // Current time
+              ),
               const SearchBarWidget(),
               const TicketsWidget(),
               const MenuTabsWidget(),
-              custom
+              const custom
                   .NavigationBar(), // Assuming NavigationBar is not a const constructor
             ],
           ),
