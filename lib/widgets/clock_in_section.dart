@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'styled_button.dart'; // import the StyledButton widget
 
 class ClockInSection extends StatelessWidget {
   final String id;
 
   const ClockInSection({super.key, required this.id});
+
+  void logOut() {
+    // Implement the log out functionality here
+    print('User logged out');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,16 +17,35 @@ class ClockInSection extends StatelessWidget {
       padding: EdgeInsets.all(10),
       child: Column(
         children: [
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFFBD663),
-              minimumSize: Size(258, 31),
+          Container(
+            width: 258,
+            height: 31,
+            padding: const EdgeInsets.symmetric(horizontal: 117, vertical: 13),
+            decoration: ShapeDecoration(
+              color: Color(0xFFFFF3CB),
               shape: RoundedRectangleBorder(
+                side: BorderSide(width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: Text('Set Up Account'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Set Up Account',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w500,
+                    height: 0.14,
+                    letterSpacing: 0.12,
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 5),
           Container(
@@ -46,17 +71,10 @@ class ClockInSection extends StatelessWidget {
               letterSpacing: 0.16,
             ),
           ),
-          SizedBox(height: 128),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFF9A825),
-              minimumSize: Size(359, 51),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text('Log out'),
+          SizedBox(height: 20),
+          StyledButton(
+            text: 'Log out',
+            onPressed: logOut,
           ),
         ],
       ),
