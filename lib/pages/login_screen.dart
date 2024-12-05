@@ -7,8 +7,7 @@ class LoginScreen extends StatefulWidget {
   final String userName;
   final String employeeId;
 
-  LoginScreen({Key? key, required this.userName, required this.employeeId})
-      : super(key: key);
+  const LoginScreen({super.key, required this.userName, required this.employeeId});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -88,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const SizedBox(height: 52),
                     Center(
-                      child: Container(
+                      child: SizedBox(
                         width: 355,
                         child: Column(
                           children: [

@@ -10,6 +10,7 @@ class ProfileInfo extends StatelessWidget {
   // Constructor to accept these parameters
   const ProfileInfo({
     super.key,
+
     required this.id,
     required this.type,
     required this.phone,
