@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../widgets/navigation_bar.dart' as custom;
 import '../providers/auth_provider.dart';
 import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
-import 'cash_flow_page.dart';
 import 'owner_page.dart';
+import 'Cash_Flow/Cash_Flow.dart';
 import 'profile_page.dart';
 import '../widgets/profile_header.dart';
 
@@ -56,9 +56,9 @@ class _MainPageState extends State<MainPage> {
       case 1:
         return InventoryTracker();
       case 2:
-        return const CashFlowPage();
+        return DashboardScreen();
       case 3:
-        return const OwnerPage();
+        return const CashFlowPage();
       case 4:
       default:
         return const ProfilePage();
