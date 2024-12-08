@@ -1,9 +1,9 @@
+import 'package:chicks_mo_unli/pages/Inventory/inventory_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/navigation_bar.dart' as custom;
 import '../providers/auth_provider.dart';
-import 'order_page.dart';
-import 'inventory_page.dart';
+import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
 import 'cash_flow_page.dart';
 import 'owner_page.dart';
 import 'profile_page.dart';
@@ -16,8 +16,12 @@ class PageTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+    return Container(
+      decoration: BoxDecoration(
+          // Remove border for debugging
+          ),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16.0, vertical: 8.0), // Adjust padding
       child: Text(
         title,
         style: TextStyle(
@@ -48,9 +52,9 @@ class _MainPageState extends State<MainPage> {
   Widget _getPage(int index) {
     switch (index) {
       case 0:
-        return const OrderPage();
+        return const OrdersKitchenScreen();
       case 1:
-        return const InventoryPage();
+        return InventoryTracker();
       case 2:
         return const CashFlowPage();
       case 3:
@@ -84,23 +88,41 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
+          // Remove border for debugging
           borderRadius: BorderRadius.circular(28),
           color: const Color(0xFFFFF3CB),
         ),
         child: Column(
           children: [
-            ProfileHeader(userName: authProvider.name),
-            PageTitle(title: _getPageTitle(_activeIndex)),
+            Container(
+              decoration: BoxDecoration(
+                  // Remove border for debugging
+                  ),
+              child: ProfileHeader(userName: authProvider.name),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                  // Remove border for debugging
+                  ),
+              child: PageTitle(title: _getPageTitle(_activeIndex)),
+            ),
             Expanded(
               child: Container(
-                color: const Color(
-                    0xFFFFF3CB), // Set the background color to match the navigation bar
+                decoration: BoxDecoration(
+                  // Remove border for debugging
+                  color: const Color(0xFFFFF3CB),
+                ),
                 child: _getPage(_activeIndex),
               ),
             ),
-            custom.NavigationBar(
-              activeIndex: _activeIndex,
-              onNavItemTapped: _onNavItemTapped,
+            Container(
+              decoration: BoxDecoration(
+                  // Remove border for debugging
+                  ),
+              child: custom.NavigationBar(
+                activeIndex: _activeIndex,
+                onNavItemTapped: _onNavItemTapped,
+              ),
             ),
           ],
         ),
