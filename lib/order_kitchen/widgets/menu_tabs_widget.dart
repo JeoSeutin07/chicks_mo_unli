@@ -153,8 +153,8 @@ class MenuSection extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               fontFamily: 'Roboto',
             ),
           ),
@@ -207,8 +207,8 @@ class MenuItem extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Inter',
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Nunito',
               height: 1.5,
             ),
           ),
@@ -219,7 +219,8 @@ class MenuItem extends StatelessWidget {
                 price,
                 style: const TextStyle(
                   fontSize: 14,
-                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Nunito',
                   color: Colors.black87,
                 ),
               ),
