@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
 
 class NavigationBar extends StatefulWidget {
   final Function(int) onNavItemTapped;

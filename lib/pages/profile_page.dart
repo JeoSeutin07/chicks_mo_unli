@@ -23,7 +23,7 @@ class ProfilePage extends StatelessWidget {
           email: authProvider.email,
           facebook: authProvider.facebook,
         ),
-        // ClockInSection(id: authProvider.employeeId),
+        ClockInSection(id: authProvider.employeeId),
       ],
     );
   }
