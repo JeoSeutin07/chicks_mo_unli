@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'styled_button.dart'; // import the StyledButton widget
 
 class ClockInSection extends StatelessWidget {
   final String id;
@@ -16,7 +17,6 @@ class ClockInSection extends StatelessWidget {
       padding: EdgeInsets.all(10),
       child: Column(
         children: [
-          SetupAccountButton(), // replace the existing button with the new widget
           SizedBox(height: 5),
           ClockStatusWidget(), // replace the existing clock status with the new widget
           SizedBox(height: 20),
@@ -91,8 +91,6 @@ class ClockStatusWidget extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.w400,
               letterSpacing: 0.16,
-              height: 1,
-            ),
           ),
         ],
       ),

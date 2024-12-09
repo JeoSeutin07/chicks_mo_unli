@@ -1,11 +1,6 @@
 import 'package:chicks_mo_unli/pages/Inventory/inventory_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/navigation_bar.dart' as custom;
-import '../providers/auth_provider.dart';
-import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
-import 'Owner/owner_page.dart';
-import 'Cash_Flow/Cash_Flow.dart';
 import 'profile_page.dart';
 import '../widgets/profile_header.dart';
 
@@ -56,9 +51,6 @@ class _MainPageState extends State<MainPage> {
       case 1:
         return InventoryTracker();
       case 2:
-        return DashboardScreen();
-      case 3:
-        return OwnerDashboard();
       case 4:
       default:
         return const ProfilePage();

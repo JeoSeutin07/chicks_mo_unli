@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+// Removed unused import
 
 class NavigationBar extends StatefulWidget {
   final Function(int) onNavItemTapped;
   final int activeIndex;
 
-  const NavigationBar(
-      {super.key, required this.onNavItemTapped, required this.activeIndex});
 
   @override
   _NavigationBarState createState() => _NavigationBarState();
