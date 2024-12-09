@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'number_pad.dart';
 
 class PinInput extends StatefulWidget {
-  final Function(String) onSubmit;
-  final Function(String) onChanged;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmit;
 
-  const PinInput({Key? key, required this.onSubmit, required this.onChanged})
-      : super(key: key);
+  const PinInput({super.key, this.onChanged, this.onSubmit});
 
   @override
   _PinInputState createState() => _PinInputState();
@@ -28,11 +27,13 @@ class _PinInputState extends State<PinInput> {
       setState(() {
         _pin[_currentIndex] = number;
         _currentIndex++;
-        widget.onChanged(_pin.join());
-        if (_currentIndex == 6) {
-          widget.onSubmit(_pin.join());
-        }
       });
+
+      _notifyChange();
+
+      if (_currentIndex == 6) {
+        widget.onSubmit?.call(_pin.join());
+      }
     }
   }
 
@@ -41,9 +42,15 @@ class _PinInputState extends State<PinInput> {
       setState(() {
         _currentIndex--;
         _pin[_currentIndex] = '';
-        widget.onChanged(_pin.join());
       });
+
+      _notifyChange();
     }
+  }
+
+  void _notifyChange() {
+    final pinString = _pin.join();
+    widget.onChanged?.call(pinString);
   }
 
   @override
@@ -74,7 +81,7 @@ class _PinInputState extends State<PinInput> {
                   (index) => Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     child: _pin[index].isNotEmpty && !_isObscured
-                        ? Container(
+                        ? SizedBox(
                             width: 15,
                             height: 15,
                             child: Center(

@@ -1,42 +1,58 @@
 import 'package:flutter/material.dart';
 
-class NavigationBar extends StatelessWidget {
-  const NavigationBar({Key? key}) : super(key: key);
+class NavigationBar extends StatefulWidget {
+  final Function(int) onNavItemTapped;
+  final int activeIndex;
+
+  const NavigationBar(
+      {super.key, required this.onNavItemTapped, required this.activeIndex});
+
+  @override
+  _NavigationBarState createState() => _NavigationBarState();
+}
+
+class _NavigationBarState extends State<NavigationBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 88,
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
+      color: const Color(0xFFFFF3CB), // Set the background color
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem('Order', Icons.shopping_cart),
-          _buildNavItem('Inventory', Icons.inventory),
-          _buildNavItem('Cash Flow', Icons.attach_money),
-          _buildNavItem('Owner', Icons.person),
-          _buildNavItem('Profile', Icons.account_circle),
+          _buildNavItem('Order', Icons.shopping_cart, 0),
+          _buildNavItem('Inventory', Icons.inventory, 1),
+          _buildNavItem('Cash Flow', Icons.attach_money, 2),
+          _buildNavItem('Owner', Icons.person, 3),
+          _buildNavItem('Profile', Icons.account_circle, 4),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(String label, IconData iconData) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          iconData,
-          size: 24,
-        ),
-        SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: Color(0xFF81807E),
-            fontSize: 14,
+  Widget _buildNavItem(String label, IconData iconData, int index) {
+    return GestureDetector(
+      onTap: () => widget.onNavItemTapped(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            iconData,
+            color: widget.activeIndex == index
+                ? Colors.black
+                : const Color(0xFF81807E),
           ),
-        ),
-      ],
+          Text(
+            label,
+            style: TextStyle(
+              color: widget.activeIndex == index
+                  ? Colors.black
+                  : const Color(0xFF81807E),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

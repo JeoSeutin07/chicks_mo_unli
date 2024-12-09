@@ -4,7 +4,7 @@ import 'login_screen.dart';
 import '../widgets/styled_button.dart';
 
 class EmployeeIdScreen extends StatefulWidget {
-  const EmployeeIdScreen({Key? key}) : super(key: key);
+  const EmployeeIdScreen({super.key});
 
   @override
   _EmployeeIdScreenState createState() => _EmployeeIdScreenState();
@@ -90,7 +90,7 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
                   children: [
                     const SizedBox(height: 52),
                     Center(
-                      child: Container(
+                      child: SizedBox(
                         width: 355,
                         child: Column(
                           children: [
