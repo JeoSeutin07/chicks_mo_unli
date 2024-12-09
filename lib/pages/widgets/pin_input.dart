@@ -28,7 +28,12 @@ class _PinInputState extends State<PinInput> {
         _pin[_currentIndex] = number;
         _currentIndex++;
       });
+
       _notifyChange();
+
+      if (_currentIndex == 6) {
+        widget.onSubmit?.call(_pin.join());
+      }
     }
   }
 
@@ -38,6 +43,7 @@ class _PinInputState extends State<PinInput> {
         _currentIndex--;
         _pin[_currentIndex] = '';
       });
+
       _notifyChange();
     }
   }
@@ -45,9 +51,6 @@ class _PinInputState extends State<PinInput> {
   void _notifyChange() {
     final pinString = _pin.join();
     widget.onChanged?.call(pinString);
-    if (pinString.length == 6) {
-      widget.onSubmit?.call(pinString);
-    }
   }
 
   @override

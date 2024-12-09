@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './widgets/pin_input.dart';
-import 'profile_screen.dart'; // Add this import
+import 'main_page.dart'; // Add this import
 
 class LoginScreen extends StatefulWidget {
   final String userName;
   final String employeeId;
 
-  const LoginScreen({super.key, required this.userName, required this.employeeId});
+  const LoginScreen(
+      {super.key, required this.userName, required this.employeeId});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -32,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user != null) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ProfileScreen()),
+            MaterialPageRoute(builder: (context) => MainPage()),
           );
         } else {
           _showDialog(context, 'Error', 'User data is null');

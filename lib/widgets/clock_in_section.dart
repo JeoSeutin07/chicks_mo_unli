@@ -5,60 +5,123 @@ class ClockInSection extends StatelessWidget {
 
   const ClockInSection({super.key, required this.id});
 
+  void logOut() {
+    // Implement the log out functionality here
+    print('User logged out');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(10),
       child: Column(
         children: [
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFFBD663),
-              minimumSize: Size(258, 31),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text('Set Up Account'),
-          ),
+          SetupAccountButton(), // replace the existing button with the new widget
           SizedBox(height: 5),
+          ClockStatusWidget(), // replace the existing clock status with the new widget
+          SizedBox(height: 20),
+          LogoutButton(), // replace the existing log out button with the new widget
+        ],
+      ),
+    );
+  }
+}
+
+class SetupAccountButton extends StatelessWidget {
+  const SetupAccountButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 258),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3CB),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.black),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 83),
+        child: Text(
+          'Set Up Account',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.12,
+            height: 2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ClockStatusWidget extends StatelessWidget {
+  const ClockStatusWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 217,
+      child: Column(
+        children: [
           Container(
-            width: double.infinity,
-            height: 115,
-            color: Color(0xFFFFEF00),
-            child: Center(
+            height: 150,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFEF00),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Center(
               child: Text(
                 'Clock In',
                 style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.w500,
                   letterSpacing: 0.48,
+                  height: 20 / 48,
                 ),
               ),
             ),
           ),
-          SizedBox(height: 5),
-          Text(
+          const SizedBox(height: 5),
+          const Text(
             'Current Status: Clocked out',
             style: TextStyle(
               fontSize: 16,
+              fontWeight: FontWeight.w400,
               letterSpacing: 0.16,
+              height: 1,
             ),
-          ),
-          SizedBox(height: 128),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFF9A825),
-              minimumSize: Size(359, 51),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text('Log out'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class LogoutButton extends StatelessWidget {
+  const LogoutButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 359),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFEF00),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 117),
+        child: Text(
+          'Log out',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.2,
+            height: 1,
+          ),
+        ),
       ),
     );
   }
