@@ -1,12 +1,6 @@
 import 'package:chicks_mo_unli/pages/Inventory/inventory_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/navigation_bar.dart'
-    as custom; // Use alias for custom NavigationBar
-import '../providers/auth_provider.dart';
-import '../order_kitchen/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
-import 'cash_flow_page.dart';
-import 'owner_page.dart';
 import 'profile_page.dart';
 import '../widgets/profile_header.dart';
 
@@ -57,9 +51,6 @@ class _MainPageState extends State<MainPage> {
       case 1:
         return InventoryTracker();
       case 2:
-        return const CashFlowPage();
-      case 3:
-        return const OwnerPage();
       case 4:
       default:
         return const ProfilePage();
@@ -121,7 +112,6 @@ class _MainPageState extends State<MainPage> {
                   // Remove border for debugging
                   ),
               child: custom.NavigationBar(
-                // Use alias for custom NavigationBar
                 activeIndex: _activeIndex,
                 onNavItemTapped: _onNavItemTapped,
               ),

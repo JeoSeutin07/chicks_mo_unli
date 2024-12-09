@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import '../widgets/profile_header.dart';
 import '../widgets/profile_info.dart';
 import '../widgets/clock_in_section.dart';
 

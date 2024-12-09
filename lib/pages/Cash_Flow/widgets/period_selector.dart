@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'custom_date_range_picker.dart'; // Import the new file
+
 class PeriodSelector extends StatefulWidget {
   @override
   _PeriodSelectorState createState() => _PeriodSelectorState();
@@ -40,6 +42,10 @@ class _PeriodSelectorState extends State<PeriodSelector> {
       isCalendarIconSelected = true;
     });
 
+    final DateTimeRange? picked = await showCustomDateRangePicker(
+      context: context,
+      startDate: startDate,
+      endDate: endDate,
     );
 
     if (picked != null) {
@@ -57,6 +63,9 @@ class _PeriodSelectorState extends State<PeriodSelector> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
