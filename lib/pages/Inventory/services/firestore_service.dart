@@ -8,6 +8,8 @@ class FirestoreService {
   Future<List<InventoryItemModel>> fetchNonPerishableItems() async {
     try {
       final snapshot = await _firestore.collection('inventory/items/non-perishables').get();
+      
+      print("Non-Perishable snapshot: ${snapshot.docs.map((doc) => doc.data()).toList()}");
 
       return snapshot.docs.map((doc) => InventoryItemModel.fromFirestore(doc.data())).toList();
     } catch (e) {
@@ -20,6 +22,8 @@ class FirestoreService {
   Future<List<InventoryItemModel>> fetchPerishableItems() async {
     try {
       final snapshot = await _firestore.collection('inventory/items/perishables').get();
+      
+      print("Perishable snapshot: ${snapshot.docs.map((doc) => doc.data()).toList()}");
 
       return snapshot.docs.map((doc) => InventoryItemModel.fromFirestore(doc.data())).toList();
     } catch (e) {

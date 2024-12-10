@@ -4,7 +4,6 @@ import './services/firestore_service.dart';
 import './models/inventory_item_model.dart';
 import './widgets/stock_legend.dart';
 
-
 class InventoryTracker extends StatefulWidget {
   @override
   _InventoryTrackerState createState() => _InventoryTrackerState();
@@ -14,6 +13,7 @@ class _InventoryTrackerState extends State<InventoryTracker> {
   bool isPerishableSelected = true;
   final FirestoreService firestoreService = FirestoreService();
   List<InventoryItemModel> inventoryItems = [];
+  bool isLoading = false; // To manage fetch loading status
 
   @override
   void initState() {
@@ -21,19 +21,33 @@ class _InventoryTrackerState extends State<InventoryTracker> {
     _fetchInventory();
   }
 
-  /// Fetch inventory data from Firestore
+  /// Fetch inventory data safely
   Future<void> _fetchInventory() async {
-    List<InventoryItemModel> fetchedItems = isPerishableSelected
-        ? await firestoreService.fetchPerishableItems()
-        : await firestoreService.fetchNonPerishableItems();
-
     setState(() {
-      inventoryItems = fetchedItems;
+      isLoading = true; // Show loader
     });
+
+    try {
+      List<InventoryItemModel> fetchedItems = isPerishableSelected
+          ? await firestoreService.fetchPerishableItems()
+          : await firestoreService.fetchNonPerishableItems();
+
+      print('Fetched items: $fetchedItems'); // Log results
+      setState(() {
+        inventoryItems = fetchedItems;
+      });
+    } catch (e) {
+      print('Error fetching inventory: $e');
+    } finally {
+      setState(() {
+        isLoading = false; // Always reset loading state
+      });
+    }
   }
 
-  /// Trigger inventory fetch when switching tabs
+  /// Handle tab switching safely
   void _onTabSelection(bool isPerishable) {
+    if (isPerishable == isPerishableSelected) return; // Prevent redundant fetch
     setState(() {
       isPerishableSelected = isPerishable;
     });
@@ -47,7 +61,7 @@ class _InventoryTrackerState extends State<InventoryTracker> {
       child: Column(
         children: [
           PeriodSelector(),
-          StockLegend(),
+          StockLegend(items: inventoryItems), // Pass dynamic inventory items safely
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -73,15 +87,17 @@ class _InventoryTrackerState extends State<InventoryTracker> {
             child: Container(
               color: Color(0xFFFFF894),
               padding: EdgeInsets.all(10),
-              child: inventoryItems.isEmpty
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      itemCount: inventoryItems.length,
-                      itemBuilder: (context, index) {
-                        final item = inventoryItems[index];
-                        return _buildInventoryItemCard(item);
-                      },
-                    ),
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator()) // Show loader safely
+                  : inventoryItems.isEmpty
+                      ? Center(child: Text("No items available"))
+                      : ListView.builder(
+                          itemCount: inventoryItems.length,
+                          itemBuilder: (context, index) {
+                            final item = inventoryItems[index];
+                            return _buildInventoryItemCard(item);
+                          },
+                        ),
             ),
           ),
           StockLegend(items: inventoryItems),
@@ -101,6 +117,8 @@ class _InventoryTrackerState extends State<InventoryTracker> {
       ),
     );
   }
+}
+
 
   /// Create tab UI
   Widget _buildTab(String text, bool isSelected, VoidCallback onTap) {
@@ -159,4 +177,4 @@ class _InventoryTrackerState extends State<InventoryTracker> {
       ),
     );
   }
-}
+
