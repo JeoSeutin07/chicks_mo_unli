@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'widgets/period_selector.dart';
 import 'perishable_items.dart';
 import 'non_perishable_items.dart';
+import 'widgets/inventory_item_card.dart';
 
 class InventoryTracker extends StatefulWidget {
   @override
@@ -13,54 +14,60 @@ class _InventoryTrackerState extends State<InventoryTracker> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin:
-          EdgeInsets.symmetric(horizontal: 10), // Add left and right margins
-      child: Column(
-        children: [
-          PeriodSelector(),
-          StockLegend(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  _buildTab('Perishable', isPerishableSelected, () {
-                    setState(() => isPerishableSelected = true);
-                  }),
-                  SizedBox(width: 8),
-                  _buildTab('Non-Perishable', !isPerishableSelected, () {
-                    setState(() => isPerishableSelected = false);
-                  }),
-                ],
-              ),
-              _buildSortButton(),
-            ],
-          ),
-          Expanded(
-            child: Container(
-              color: Color(0xFFFFF894), // Set the background color
-              padding: EdgeInsets.all(10), // Set the inside padding
-              child: ListView(
-                children: isPerishableSelected
-                    ? buildPerishableItems()
-                    : buildNonPerishableItems(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Inventory Tracker'),
+      ),
+      body: Container(
+        margin: EdgeInsets.symmetric(horizontal: 10), // Add left and right margins
+        child: Column(
+          children: [
+            PeriodSelector(),
+            StockLegend(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    _buildTab('Perishable', isPerishableSelected, () {
+                      setState(() => isPerishableSelected = true);
+                    }),
+                    SizedBox(width: 8),
+                    _buildTab('Non-Perishable', !isPerishableSelected, () {
+                      setState(() => isPerishableSelected = false);
+                    }),
+                  ],
+                ),
+                _buildSortButton(),
+              ],
+            ),
+            Expanded(
+  child: Container(
+    color: Color(0xFFFFF894), // Set the background color
+    padding: EdgeInsets.all(10), // Set the inside padding
+    child: ListView(
+      children: isPerishableSelected
+          ? buildPerishableItems()
+          : buildNonPerishableItems(),
+    ),
+  ),
+),
+            ElevatedButton(
+              onPressed: () {
+                // Logic for adjusting stock can go here
+              },
+              child: Text('Adjust Stock'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFFFEF00),
+                foregroundColor: Colors.black,
+                minimumSize: Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {},
-            child: Text('Adjust Stock'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFFFEF00),
-              foregroundColor: Colors.black,
-              minimumSize: Size(double.infinity, 48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -77,7 +84,13 @@ class _InventoryTrackerState extends State<InventoryTracker> {
             topRight: Radius.circular(8),
           ),
         ),
-        child: Text(text),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.black : Colors.grey[800],
+          ),
+        ),
       ),
     );
   }
