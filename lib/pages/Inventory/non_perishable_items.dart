@@ -9,7 +9,7 @@ List<Widget> buildNonPerishableItems() {
       startingStock: 2,
       restock: 10,
       totalStock: 12,
-      remainingStock: 3,
+      remainingStock: 0,
       isPerishable: false,
     ),
     InventoryItemCard(
