@@ -1,4 +1,6 @@
 // File: lib/pages/inventory/model/inventory_item_model.dart
+import 'package:flutter/material.dart';
+
 class InventoryItemModel {
   final String name;
   final bool isPerishable;
@@ -30,18 +32,34 @@ class InventoryItemModel {
       totalStock: data['totalStock'] ?? 0,
       remainingStock: data['remainingStock'] ?? 0,
       upStock: data['upStock'] ?? 0,
-      downStock: data['downsStock'] ?? 0,
+      downStock: data['downStock'] ?? 0,
     );
+  }
+
+  /// Dynamically calculate stock percentage
+  double get stockPercentage {
+    return (remainingStock / totalStock).clamp(0.0, 1.0);
+  }
+
+  /// Dynamically determine the stock color
+  Color get stockColor {
+    if (stockPercentage >= 0.75) {
+      return Color(0xFFA1D8A6); // High Stock - Green
+    } else if (stockPercentage >= 0.25) {
+      return Color(0xFFFFA500); // Moderate Stock - Orange
+    } else {
+      return Color(0xFFE74C3C); // Low Stock - Red
+    }
   }
 
   /// Determine the stock level dynamically
   String get stockLevel {
-    if (remainingStock > upStock) {
+    if (stockPercentage >= 0.75) {
       return 'High';
-    } else if (remainingStock < downStock) {
-      return 'Low';
-    } else {
+    } else if (stockPercentage >= 0.25) {
       return 'Moderate';
+    } else {
+      return 'Low';
     }
   }
 }

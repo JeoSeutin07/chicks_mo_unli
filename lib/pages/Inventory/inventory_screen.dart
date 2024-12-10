@@ -84,23 +84,66 @@ class _InventoryTrackerState extends State<InventoryTracker> {
             ],
           ),
           Expanded(
-            child: Container(
-              color: Color(0xFFFFF894),
-              padding: EdgeInsets.all(10),
-              child: isLoading
-                  ? Center(child: CircularProgressIndicator()) // Show loader safely
-                  : inventoryItems.isEmpty
-                      ? Center(child: Text("No items available"))
-                      : ListView.builder(
-                          itemCount: inventoryItems.length,
-                          itemBuilder: (context, index) {
-                            final item = inventoryItems[index];
-                            return _buildInventoryItemCard(item);
-                          },
-                        ),
-            ),
+  child: Container(
+    color: Color(0xFFFFF894),
+    padding: EdgeInsets.all(10),
+    child: inventoryItems.isEmpty
+        ? Center(child: CircularProgressIndicator())
+        : ListView.builder(
+            itemCount: inventoryItems.length,
+            itemBuilder: (context, index) {
+              final item = inventoryItems[index];
+              return Container(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xFFFFF3CB),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: item.stockColor,
+                    width: 3,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: item.stockPercentage,
+                      backgroundColor: Colors.grey[300],
+                      valueColor: AlwaysStoppedAnimation<Color>(item.stockColor),
+                      minHeight: 8,
+                    ),
+                    SizedBox(height: 8),
+                    Text('Stock Level: ${item.stockLevel}'),
+                    Text('Total Stock: ${item.totalStock}'),
+                    Text('Remaining Stock: ${item.remainingStock}'),
+                    Text('Restock Needed: ${item.restock}'),
+                    SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Adjust stock placeholder logic
+                        print('Adjust Stock for ${item.name}');
+                      },
+                      child: Text('Adjust Stock'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFFFEF00),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-          StockLegend(items: inventoryItems),
+  ),
+),
           ElevatedButton(
             onPressed: () {},
             child: Text('Adjust Stock'),
