@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './widgets/pin_input.dart';
 import 'main_page.dart'; // Add this import
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   final String userName;
   final String employeeId;
-
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   const LoginScreen(
       {super.key, required this.userName, required this.employeeId});
 
@@ -15,6 +16,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   bool _isDialogShowing = false;
 
   Future<void> _login(String pin, BuildContext context) async {
@@ -27,10 +29,14 @@ class _LoginScreenState extends State<LoginScreen> {
           .where('EmployeeID', isEqualTo: widget.employeeId)
           .where('pin', isEqualTo: parsedPin)
           .get();
+
       final List<DocumentSnapshot> documents = result.docs;
       if (documents.isNotEmpty) {
         final user = documents.first.data() as Map<String, dynamic>?;
+
         if (user != null) {
+          await _secureStorage.write(
+              key: 'employeeID', value: widget.employeeId);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => MainPage()),

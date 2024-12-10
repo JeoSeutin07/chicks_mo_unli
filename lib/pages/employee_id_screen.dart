@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'login_screen.dart';
 import '../widgets/styled_button.dart';
 
@@ -12,9 +13,35 @@ class EmployeeIdScreen extends StatefulWidget {
 
 class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
   final TextEditingController _controller = TextEditingController();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   bool _isFocused = false;
   bool _isDialogShowing = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkStoredEmployeeId();
+  }
+
+  /// Check if an EmployeeID is already stored
+  Future<void> _checkStoredEmployeeId() async {
+    final String? storedEmployeeId =
+        await _secureStorage.read(key: 'employeeID');
+    if (storedEmployeeId != null) {
+      // Navigate directly to LoginScreen with the stored EmployeeID
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(
+            userName: '', // Username will be fetched later
+            employeeId: storedEmployeeId,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Validate the entered EmployeeID with Firestore
   Future<void> _checkEmployeeId(BuildContext context) async {
     if (_isDialogShowing) return;
 
@@ -26,10 +53,14 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
           .get();
       final List<DocumentSnapshot> documents = result.docs;
       if (documents.isNotEmpty) {
-        // Employee ID found, proceed to login screen
+        // Employee ID found, store it and proceed to login screen
         final user = documents.first.data() as Map<String, dynamic>?;
         if (user != null) {
-          Navigator.push(
+          // Save EmployeeID in secure storage
+          await _secureStorage.write(key: 'employeeID', value: employeeId);
+
+          // Navigate to LoginScreen
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) =>
@@ -48,6 +79,7 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
     }
   }
 
+  /// Show error or info dialog
   void _showDialog(BuildContext context, String title, String message) {
     if (_isDialogShowing) return;
 
