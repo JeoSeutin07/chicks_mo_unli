@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'widgets/period_selector.dart';
-import 'perishable_items.dart';
-import 'non_perishable_items.dart';
+import './services/firestore_service.dart';
+import './models/inventory_item_model.dart';
+import './widgets/stock_legend.dart';
+
 
 class InventoryTracker extends StatefulWidget {
   @override
@@ -10,12 +12,38 @@ class InventoryTracker extends StatefulWidget {
 
 class _InventoryTrackerState extends State<InventoryTracker> {
   bool isPerishableSelected = true;
+  final FirestoreService firestoreService = FirestoreService();
+  List<InventoryItemModel> inventoryItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInventory();
+  }
+
+  /// Fetch inventory data from Firestore
+  Future<void> _fetchInventory() async {
+    List<InventoryItemModel> fetchedItems = isPerishableSelected
+        ? await firestoreService.fetchPerishableItems()
+        : await firestoreService.fetchNonPerishableItems();
+
+    setState(() {
+      inventoryItems = fetchedItems;
+    });
+  }
+
+  /// Trigger inventory fetch when switching tabs
+  void _onTabSelection(bool isPerishable) {
+    setState(() {
+      isPerishableSelected = isPerishable;
+    });
+    _fetchInventory();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin:
-          EdgeInsets.symmetric(horizontal: 10), // Add left and right margins
+      margin: EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
           PeriodSelector(),
@@ -25,13 +53,17 @@ class _InventoryTrackerState extends State<InventoryTracker> {
             children: [
               Row(
                 children: [
-                  _buildTab('Perishable', isPerishableSelected, () {
-                    setState(() => isPerishableSelected = true);
-                  }),
+                  _buildTab(
+                    'Perishable',
+                    isPerishableSelected,
+                    () => _onTabSelection(true),
+                  ),
                   SizedBox(width: 8),
-                  _buildTab('Non-Perishable', !isPerishableSelected, () {
-                    setState(() => isPerishableSelected = false);
-                  }),
+                  _buildTab(
+                    'Non-Perishable',
+                    !isPerishableSelected,
+                    () => _onTabSelection(false),
+                  ),
                 ],
               ),
               _buildSortButton(),
@@ -39,15 +71,20 @@ class _InventoryTrackerState extends State<InventoryTracker> {
           ),
           Expanded(
             child: Container(
-              color: Color(0xFFFFF894), // Set the background color
-              padding: EdgeInsets.all(10), // Set the inside padding
-              child: ListView(
-                children: isPerishableSelected
-                    ? buildPerishableItems()
-                    : buildNonPerishableItems(),
-              ),
+              color: Color(0xFFFFF894),
+              padding: EdgeInsets.all(10),
+              child: inventoryItems.isEmpty
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: inventoryItems.length,
+                      itemBuilder: (context, index) {
+                        final item = inventoryItems[index];
+                        return _buildInventoryItemCard(item);
+                      },
+                    ),
             ),
           ),
+          StockLegend(items: inventoryItems),
           ElevatedButton(
             onPressed: () {},
             child: Text('Adjust Stock'),
@@ -65,6 +102,7 @@ class _InventoryTrackerState extends State<InventoryTracker> {
     );
   }
 
+  /// Create tab UI
   Widget _buildTab(String text, bool isSelected, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
@@ -82,6 +120,7 @@ class _InventoryTrackerState extends State<InventoryTracker> {
     );
   }
 
+  /// Create sort button UI
   Widget _buildSortButton() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -99,41 +138,25 @@ class _InventoryTrackerState extends State<InventoryTracker> {
       ),
     );
   }
-}
 
-class StockLegend extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildLegendItem('High Stock', Color(0xFFA1D8A6)),
-          _buildLegendItem('Moderate Stock', Color(0xFFFFA500)),
-          _buildLegendItem('Low Stock', Color(0xFFE74C3C)),
-        ],
+  /// Dynamically create inventory item cards
+  Widget _buildInventoryItemCard(InventoryItemModel item) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
       ),
-    );
-  }
-
-  Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+      child: ListTile(
+        title: Text(item.name),
+        subtitle: Text('Stock Level: ${item.stockLevel}'),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Remaining: ${item.remainingStock}'),
+            Text('Restock: ${item.restock}'),
+          ],
         ),
-        SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(fontSize: 11),
-        ),
-      ],
+      ),
     );
   }
 }
