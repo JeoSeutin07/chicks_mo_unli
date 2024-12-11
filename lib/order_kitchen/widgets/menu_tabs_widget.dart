@@ -55,43 +55,72 @@ class MenuTabContent extends StatelessWidget {
 
   const MenuTabContent({super.key, required this.onItemSelected});
 
-  Future<List<MenuItem>> fetchMenuItems() async {
+  Future<List<MenuCategory>> fetchMenuCategories() async {
     // Simulate fetching data from a local source
     await Future.delayed(const Duration(seconds: 1));
     return [
-      MenuItem(
-          title: 'Unlimited Drumettes, rice & drinks',
-          price: '249',
-          onSelected: onItemSelected),
-      MenuItem(
-          title: 'Unlimited Wings, rice & drinks',
-          price: '289',
-          onSelected: onItemSelected),
-      MenuItem(
-          title: 'Unlimited Wings, rice, drinks & fries',
-          price: '309',
-          onSelected: onItemSelected),
-      MenuItem(
-          title: 'Unlimited Wings only',
-          price: '349',
-          onSelected: onItemSelected),
-      MenuItem(
-          title: '1 Pound Wings', price: '189', onSelected: onItemSelected),
-      MenuItem(title: 'Barkada Meal', price: '339', onSelected: onItemSelected),
-      MenuItem(title: 'MM2', price: '99', onSelected: onItemSelected),
-      MenuItem(title: 'Rice', price: '25', onSelected: onItemSelected),
-      MenuItem(title: 'Extra Dip', price: '25', onSelected: onItemSelected),
-      MenuItem(title: 'Fries', price: '60', onSelected: onItemSelected),
-      MenuItem(title: 'Refreshments', price: '69', onSelected: onItemSelected),
-      MenuItem(title: 'Soft Drinks', price: '100', onSelected: onItemSelected),
-      MenuItem(title: 'Chill Drinks', price: '75', onSelected: onItemSelected),
+      MenuCategory(
+        title: 'Eat All-You-Can',
+        items: [
+          MenuItem(
+              title: 'Unlimited Drumettes, rice & drinks',
+              price: '249',
+              onSelected: onItemSelected),
+          MenuItem(
+              title: 'Unlimited Wings, rice & drinks',
+              price: '289',
+              onSelected: onItemSelected),
+          MenuItem(
+              title: 'Unlimited Wings, rice, drinks & fries',
+              price: '309',
+              onSelected: onItemSelected),
+          MenuItem(
+              title: 'Unlimited Wings only',
+              price: '349',
+              onSelected: onItemSelected),
+        ],
+      ),
+      MenuCategory(
+        title: 'Refills',
+        items: [
+          MenuItem(title: 'Wings', price: '', onSelected: onItemSelected),
+          MenuItem(title: 'Drumettes', price: '', onSelected: onItemSelected),
+          MenuItem(title: 'Rice', price: '', onSelected: onItemSelected),
+          MenuItem(title: 'Fries', price: '', onSelected: onItemSelected),
+          MenuItem(title: 'Drinks', price: '', onSelected: onItemSelected),
+        ],
+      ),
+      MenuCategory(
+        title: 'Ala Carte',
+        items: [
+          MenuItem(
+              title: '1 Pound Wings', price: '189', onSelected: onItemSelected),
+          MenuItem(
+              title: 'Barkada Meal', price: '339', onSelected: onItemSelected),
+          MenuItem(title: 'MM2', price: '99', onSelected: onItemSelected),
+        ],
+      ),
+      MenuCategory(
+        title: 'Add-Ons',
+        items: [
+          MenuItem(title: 'Rice', price: '25', onSelected: onItemSelected),
+          MenuItem(title: 'Extra Dip', price: '25', onSelected: onItemSelected),
+          MenuItem(title: 'Fries', price: '60', onSelected: onItemSelected),
+          MenuItem(
+              title: 'Refreshments', price: '69', onSelected: onItemSelected),
+          MenuItem(
+              title: 'Soft Drinks', price: '100', onSelected: onItemSelected),
+          MenuItem(
+              title: 'Chill Drinks', price: '75', onSelected: onItemSelected),
+        ],
+      ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<MenuItem>>(
-      future: fetchMenuItems(),
+    return FutureBuilder<List<MenuCategory>>(
+      future: fetchMenuCategories(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -100,20 +129,29 @@ class MenuTabContent extends StatelessWidget {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('No menu items available'));
         } else {
-          return ListView(
+          return ListView.builder(
             padding: const EdgeInsets.all(5),
-            children: [
-              MenuSection(
-                title: 'Menu',
-                items: snapshot.data!,
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              final category = snapshot.data![index];
+              return MenuSection(
+                title: category.title,
+                items: category.items,
                 onItemSelected: onItemSelected,
-              ),
-            ],
+              );
+            },
           );
         }
       },
     );
   }
+}
+
+class MenuCategory {
+  final String title;
+  final List<MenuItem> items;
+
+  MenuCategory({required this.title, required this.items});
 }
 
 class MenuSection extends StatelessWidget {
