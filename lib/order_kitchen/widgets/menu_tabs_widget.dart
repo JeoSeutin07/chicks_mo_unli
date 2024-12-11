@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'tickets_widget.dart';
 
 class MenuTabsWidget extends StatefulWidget {
   const MenuTabsWidget({super.key});
@@ -43,6 +44,9 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
             child: TabBarView(
               children: tabViews,
             ),
+          ),
+          Expanded(
+            child: TicketsWidget(),
           ),
         ],
       ),

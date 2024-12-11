@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chicks_mo_unli/order_kitchen/widgets/menu_tabs_widget.dart';
+import 'menu_tabs_widget.dart';
 
 class Order {
   final int tableNumber;
@@ -103,7 +103,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Table #$currentTableNumber Order'),
-        content: Container(
+        content: SizedBox(
           width: double.maxFinite,
           child: MenuTabContent(
             onItemSelected: (item) {
