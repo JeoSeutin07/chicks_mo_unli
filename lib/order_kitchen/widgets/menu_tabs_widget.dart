@@ -28,16 +28,22 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
     Tab(text: 'Served'),
   ];
 
-  List<Widget> tabViews = [
-    MenuTabContent(
-      onItemSelected: (item) {
-        // Handle item selection
-        print("Selected: ${item.title}");
-      },
-    ),
-    const Center(child: Text('Queue Content')),
-    const Center(child: Text('Served Content')),
-  ];
+  List<Widget> tabViews = [];
+
+  @override
+  void initState() {
+    super.initState();
+    tabViews = [
+      MenuTabContent(
+        onItemSelected: (item) {
+          // Handle item selection
+          print("Selected: ${item.title}");
+        },
+      ),
+      const Center(child: Text('Queue Content')),
+      const Center(child: Text('Served Content')),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,22 +56,25 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
         ),
         DefaultTabController(
           length: tabs.length,
-          child: Column(
-            children: [
-              TabBar(
-                tabs: tabs,
-                labelColor: Colors.black,
-                unselectedLabelColor: Colors.black54,
-                indicatorColor: const Color(0xFFFFF55E),
-              ),
-              Container(
-                height: 475,
-                color: const Color(0xFFFFF894),
-                child: TabBarView(
-                  children: tabViews,
+          child: Expanded(
+            child: Column(
+              children: [
+                TabBar(
+                  tabs: tabs,
+                  labelColor: Colors.black,
+                  unselectedLabelColor: Colors.black54,
+                  indicatorColor: const Color(0xFFFFF55E),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Container(
+                    color: const Color(0xFFFFF894),
+                    child: TabBarView(
+                      children: tabViews,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -85,56 +94,40 @@ class MenuTabContent extends StatelessWidget {
       MenuCategory(
         title: 'Eat All-You-Can',
         items: [
+          MenuItem(title: 'Unlimited Drumettes, rice & drinks', price: '249'),
+          MenuItem(title: 'Unlimited Wings, rice & drinks', price: '289'),
           MenuItem(
-              title: 'Unlimited Drumettes, rice & drinks',
-              price: '249',
-              onSelected: onItemSelected),
-          MenuItem(
-              title: 'Unlimited Wings, rice & drinks',
-              price: '289',
-              onSelected: onItemSelected),
-          MenuItem(
-              title: 'Unlimited Wings, rice, drinks & fries',
-              price: '309',
-              onSelected: onItemSelected),
-          MenuItem(
-              title: 'Unlimited Wings only',
-              price: '349',
-              onSelected: onItemSelected),
+              title: 'Unlimited Wings, rice, drinks & fries', price: '309'),
+          MenuItem(title: 'Unlimited Wings only', price: '349'),
         ],
       ),
       MenuCategory(
         title: 'Refills',
         items: [
-          MenuItem(title: 'Wings', price: '', onSelected: onItemSelected),
-          MenuItem(title: 'Drumettes', price: '', onSelected: onItemSelected),
-          MenuItem(title: 'Rice', price: '', onSelected: onItemSelected),
-          MenuItem(title: 'Fries', price: '', onSelected: onItemSelected),
-          MenuItem(title: 'Drinks', price: '', onSelected: onItemSelected),
+          MenuItem(title: 'Wings', price: ''),
+          MenuItem(title: 'Drumettes', price: ''),
+          MenuItem(title: 'Rice', price: ''),
+          MenuItem(title: 'Fries', price: ''),
+          MenuItem(title: 'Drinks', price: ''),
         ],
       ),
       MenuCategory(
         title: 'Ala Carte',
         items: [
-          MenuItem(
-              title: '1 Pound Wings', price: '189', onSelected: onItemSelected),
-          MenuItem(
-              title: 'Barkada Meal', price: '339', onSelected: onItemSelected),
-          MenuItem(title: 'MM2', price: '99', onSelected: onItemSelected),
+          MenuItem(title: '1 Pound Wings', price: '189'),
+          MenuItem(title: 'Barkada Meal', price: '339'),
+          MenuItem(title: 'MM2', price: '99'),
         ],
       ),
       MenuCategory(
         title: 'Add-Ons',
         items: [
-          MenuItem(title: 'Rice', price: '25', onSelected: onItemSelected),
-          MenuItem(title: 'Extra Dip', price: '25', onSelected: onItemSelected),
-          MenuItem(title: 'Fries', price: '60', onSelected: onItemSelected),
-          MenuItem(
-              title: 'Refreshments', price: '69', onSelected: onItemSelected),
-          MenuItem(
-              title: 'Soft Drinks', price: '100', onSelected: onItemSelected),
-          MenuItem(
-              title: 'Chill Drinks', price: '75', onSelected: onItemSelected),
+          MenuItem(title: 'Rice', price: '25'),
+          MenuItem(title: 'Extra Dip', price: '25'),
+          MenuItem(title: 'Fries', price: '60'),
+          MenuItem(title: 'Refreshments', price: '69'),
+          MenuItem(title: 'Soft Drinks', price: '100'),
+          MenuItem(title: 'Chill Drinks', price: '75'),
         ],
       ),
     ];
@@ -214,7 +207,10 @@ class MenuSection extends StatelessWidget {
           crossAxisSpacing: 15,
           padding: const EdgeInsets.symmetric(horizontal: 10),
           children: items.map((item) {
-            return item; // Each MenuItem is clickable as a whole
+            return MenuItemWidget(
+              item: item,
+              onSelected: onItemSelected,
+            );
           }).toList(),
         ),
       ],
@@ -222,22 +218,20 @@ class MenuSection extends StatelessWidget {
   }
 }
 
-class MenuItem extends StatelessWidget {
-  final String title;
-  final String price;
+class MenuItemWidget extends StatelessWidget {
+  final MenuItem item;
   final Function(MenuItem) onSelected;
 
-  const MenuItem({
+  const MenuItemWidget({
     super.key,
-    required this.title,
-    required this.price,
+    required this.item,
     required this.onSelected,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onSelected(this),
+      onTap: () => onSelected(item),
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFFFBD663),
@@ -255,7 +249,7 @@ class MenuItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              title,
+              item.title,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,
@@ -264,11 +258,11 @@ class MenuItem extends StatelessWidget {
                 height: 1.5,
               ),
             ),
-            if (price.isNotEmpty)
+            if (item.price.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
-                  price,
+                  item.price,
                   style: const TextStyle(
                     fontSize: 14,
                     fontFamily: 'Inter',
@@ -281,4 +275,11 @@ class MenuItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class MenuItem {
+  final String title;
+  final String price;
+
+  MenuItem({required this.title, required this.price});
 }

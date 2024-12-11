@@ -39,22 +39,23 @@ class _TicketsWidgetState extends State<TicketsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'On-Going Tickets',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Roboto',
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'On-Going Tickets',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Roboto',
+              ),
             ),
           ),
           const SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                ...widget.orders
-                    .map((order) => OrderTicket(order: order))
-                    .toList(),
                 Container(
                   width: 72,
                   margin: const EdgeInsets.symmetric(vertical: 5),
@@ -78,6 +79,10 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                     ),
                   ),
                 ),
+                const SizedBox(width: 10), // Add spacing between buttons
+                ...widget.orders
+                    .map((order) => OrderTicket(order: order))
+                    .toList(),
               ],
             ),
           ),
@@ -128,9 +133,9 @@ class OrderTicket extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 120,
+      width: 72,
       margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: const Color(0xFFFBD663),
         borderRadius: BorderRadius.circular(8),
@@ -138,12 +143,23 @@ class OrderTicket extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Table #${order.tableNumber}',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            'Table #${order.tableNumber}',
+            style: const TextStyle(
+              fontSize: 11,
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
           ...order.items
-              .map((item) =>
-                  Text(item.title, style: const TextStyle(fontSize: 12)))
+              .map((item) => Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'Inter',
+                    ),
+                  ))
               .toList(),
         ],
       ),
