@@ -14,27 +14,23 @@ class Order {
 }
 
 class TicketsWidget extends StatefulWidget {
-  const TicketsWidget({super.key});
+  final List<Order> orders;
+  final int currentTableNumber;
+  final Function(List<MenuItem>) onAddOrder;
+
+  const TicketsWidget({
+    super.key,
+    required this.orders,
+    required this.currentTableNumber,
+    required this.onAddOrder,
+  });
 
   @override
   State<TicketsWidget> createState() => _TicketsWidgetState();
 }
 
 class _TicketsWidgetState extends State<TicketsWidget> {
-  List<Order> orders = [];
-  int currentTableNumber = 1;
   List<MenuItem> selectedItems = [];
-
-  void addOrder(List<MenuItem> items) {
-    setState(() {
-      orders.add(Order(
-        tableNumber: currentTableNumber++,
-        items: items,
-        timestamp: DateTime.now(),
-      ));
-      selectedItems.clear(); // Clear selected items after adding order
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +39,6 @@ class _TicketsWidgetState extends State<TicketsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(
-            child: Text(
-              'Orders and Kitchen',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Roboto',
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
           const Text(
             'On-Going Tickets',
             style: TextStyle(
@@ -62,11 +47,14 @@ class _TicketsWidgetState extends State<TicketsWidget> {
               fontFamily: 'Roboto',
             ),
           ),
+          const SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                ...orders.map((order) => OrderTicket(order: order)).toList(),
+                ...widget.orders
+                    .map((order) => OrderTicket(order: order))
+                    .toList(),
                 Container(
                   width: 72,
                   margin: const EdgeInsets.symmetric(vertical: 5),
@@ -102,7 +90,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Table #$currentTableNumber Order'),
+        title: Text('Table #${widget.currentTableNumber} Order'),
         content: SizedBox(
           width: double.maxFinite,
           child: MenuTabContent(
@@ -120,7 +108,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
           ),
           TextButton(
             onPressed: () {
-              addOrder(selectedItems);
+              widget.onAddOrder(selectedItems);
+              selectedItems.clear();
               Navigator.pop(context);
             },
             child: const Text('Create Order'),

@@ -9,6 +9,19 @@ class MenuTabsWidget extends StatefulWidget {
 }
 
 class _MenuTabsWidgetState extends State<MenuTabsWidget> {
+  List<Order> orders = [];
+  int currentTableNumber = 1;
+
+  void addOrder(List<MenuItem> items) {
+    setState(() {
+      orders.add(Order(
+        tableNumber: currentTableNumber++,
+        items: items,
+        timestamp: DateTime.now(),
+      ));
+    });
+  }
+
   List<Widget> tabs = const [
     Tab(text: 'Menu'),
     Tab(text: 'Queue'),
@@ -28,28 +41,34 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: tabs.length,
-      child: Column(
-        children: [
-          TabBar(
-            tabs: tabs,
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.black54,
-            indicatorColor: const Color(0xFFFFF55E),
+    return Column(
+      children: [
+        TicketsWidget(
+          orders: orders,
+          currentTableNumber: currentTableNumber,
+          onAddOrder: addOrder,
+        ),
+        DefaultTabController(
+          length: tabs.length,
+          child: Column(
+            children: [
+              TabBar(
+                tabs: tabs,
+                labelColor: Colors.black,
+                unselectedLabelColor: Colors.black54,
+                indicatorColor: const Color(0xFFFFF55E),
+              ),
+              Container(
+                height: 475,
+                color: const Color(0xFFFFF894),
+                child: TabBarView(
+                  children: tabViews,
+                ),
+              ),
+            ],
           ),
-          Container(
-            height: 475,
-            color: const Color(0xFFFFF894),
-            child: TabBarView(
-              children: tabViews,
-            ),
-          ),
-          Expanded(
-            child: TicketsWidget(),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
