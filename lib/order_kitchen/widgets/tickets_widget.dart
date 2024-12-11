@@ -1,7 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:chicks_mo_unli/order_kitchen/widgets/menu_tabs_widget.dart';
 
-class TicketsWidget extends StatelessWidget {
+class Order {
+  final int tableNumber;
+  final List<MenuItem> items;
+  final DateTime timestamp;
+
+  Order({
+    required this.tableNumber,
+    required this.items,
+    required this.timestamp,
+  });
+}
+
+class TicketsWidget extends StatefulWidget {
   const TicketsWidget({super.key});
+
+  @override
+  State<TicketsWidget> createState() => _TicketsWidgetState();
+}
+
+class _TicketsWidgetState extends State<TicketsWidget> {
+  List<Order> orders = [];
+  int currentTableNumber = 1;
+  List<MenuItem> selectedItems = [];
+
+  void addOrder(List<MenuItem> items) {
+    setState(() {
+      orders.add(Order(
+        tableNumber: currentTableNumber++,
+        items: items,
+        timestamp: DateTime.now(),
+      ));
+      selectedItems.clear(); // Clear selected items after adding order
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +66,30 @@ class TicketsWidget extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                TicketItem(
-                  title: 'Create Table',
-                  onTap: () {},
+                ...orders.map((order) => OrderTicket(order: order)).toList(),
+                Container(
+                  width: 72,
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  child: Material(
+                    color: const Color(0xFFFBD663),
+                    borderRadius: BorderRadius.circular(8),
+                    child: InkWell(
+                      onTap: () => showOrderDialog(context),
+                      borderRadius: BorderRadius.circular(8),
+                      child: const Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text(
+                          'Create Table',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                // Add more TicketItem widgets as needed
               ],
             ),
           ),
@@ -45,41 +97,66 @@ class TicketsWidget extends StatelessWidget {
       ),
     );
   }
+
+  void showOrderDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Table #$currentTableNumber Order'),
+        content: Container(
+          width: double.maxFinite,
+          child: MenuTabContent(
+            onItemSelected: (item) {
+              setState(() {
+                selectedItems.add(item);
+              });
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              addOrder(selectedItems);
+              Navigator.pop(context);
+            },
+            child: const Text('Create Order'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class TicketItem extends StatelessWidget {
-  final String title;
-  final VoidCallback onTap;
+class OrderTicket extends StatelessWidget {
+  final Order order;
 
-  const TicketItem({
-    Key? key,
-    required this.title,
-    required this.onTap,
-  }) : super(key: key);
+  const OrderTicket({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 72,
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      child: Material(
+      width: 120,
+      margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
         color: const Color(0xFFFBD663),
         borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                fontFamily: 'Inter',
-              ),
-            ),
-          ),
-        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Table #${order.tableNumber}',
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          ...order.items
+              .map((item) =>
+                  Text(item.title, style: const TextStyle(fontSize: 12)))
+              .toList(),
+        ],
       ),
     );
   }
