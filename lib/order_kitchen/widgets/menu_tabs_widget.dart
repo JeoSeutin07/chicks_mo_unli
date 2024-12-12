@@ -22,49 +22,76 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
     });
   }
 
+  List<Widget> tabs = const [
+    Tab(text: 'Menu'),
+    Tab(text: 'Queue'),
+    Tab(text: 'Served'),
+  ];
+
+  List<Widget> tabViews = [];
+
+  @override
+  void initState() {
+    super.initState();
+    tabViews = [
+      MenuTabContent(
+        onItemSelected: (item) {
+          // Handle item selection
+          print("Selected: ${item.title}");
+        },
+      ),
+      const Center(child: Text('Queue Content')),
+      const Center(child: Text('Served Content')),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TicketsWidget(
-          orders: orders,
-          currentTableNumber: currentTableNumber,
-          onAddOrder: addOrder,
-        ),
-        Expanded(
-          child: DefaultTabController(
-            length: 3,
-            child: Column(
-              children: [
-                TabBar(
-                  tabs: const [
-                    Tab(text: 'Menu'),
-                    Tab(text: 'Queue'),
-                    Tab(text: 'Served'),
-                  ],
-                  labelColor: Colors.black,
-                  unselectedLabelColor: Colors.black54,
-                  indicatorColor: const Color(0xFFFFF55E),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      MenuTabContent(
-                        onItemSelected: (item) {
-                          // Handle item selection
-                          print("Selected: ${item.title}");
-                        },
-                      ),
-                      const Center(child: Text('Queue Content')),
-                      const Center(child: Text('Served Content')),
-                    ],
-                  ),
-                ),
-              ],
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF3CB),
+      body: SafeArea(
+        child: Column(
+          children: [
+            TicketsWidget(
+              orders: orders,
+              currentTableNumber: currentTableNumber,
+              onAddOrder: addOrder,
             ),
-          ),
+            DefaultTabController(
+              length: tabs.length,
+              child: Expanded(
+                child: Column(
+                  children: [
+                    TabBar(
+                      tabs: tabs,
+                      labelColor: Colors.black,
+                      unselectedLabelColor: Colors.black54,
+                      indicator: BoxDecoration(
+                        color: const Color(0xFFFFF55E), // Highlighted tab color
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ), // Rounded tabs only at the top
+                      ),
+                      indicatorSize:
+                          TabBarIndicatorSize.tab, // Full-width indicator
+                    ),
+                    Expanded(
+                      child: Container(
+                        color: const Color(
+                            0xFFFFF55E), // Background color same as selected tab
+                        child: TabBarView(
+                          children: tabViews,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
