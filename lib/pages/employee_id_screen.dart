@@ -16,6 +16,7 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   bool _isFocused = false;
   bool _isDialogShowing = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -27,13 +28,14 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
   Future<void> _checkStoredEmployeeId() async {
     final String? storedEmployeeId =
         await _secureStorage.read(key: 'employeeID');
-    if (storedEmployeeId != null) {
+    final String? storedUserName = await _secureStorage.read(key: 'username');
+    if (storedEmployeeId != null && storedUserName != null) {
       // Navigate directly to LoginScreen with the stored EmployeeID
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => LoginScreen(
-            userName: '', // Username will be fetched later
+            userName: storedUserName, // Username will be fetched later
             employeeId: storedEmployeeId,
           ),
         ),
@@ -44,6 +46,10 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
   /// Validate the entered EmployeeID with Firestore
   Future<void> _checkEmployeeId(BuildContext context) async {
     if (_isDialogShowing) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     final employeeId = _controller.text;
     try {
@@ -58,7 +64,7 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
         if (user != null) {
           // Save EmployeeID in secure storage
           await _secureStorage.write(key: 'employeeID', value: employeeId);
-
+          await _secureStorage.write(key: 'username', value: user['name']);
           // Navigate to LoginScreen
           Navigator.pushReplacement(
             context,
@@ -76,6 +82,10 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
       }
     } catch (e) {
       _showDialog(context, 'Error', 'Error checking Employee ID: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -172,12 +182,14 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            StyledButton(
-                              text: 'Next',
-                              onPressed: () {
-                                _checkEmployeeId(context);
-                              },
-                            ),
+                            _isLoading
+                                ? const CircularProgressIndicator()
+                                : StyledButton(
+                                    text: 'Next',
+                                    onPressed: () {
+                                      _checkEmployeeId(context);
+                                    },
+                                  ),
                           ],
                         ),
                       ),
