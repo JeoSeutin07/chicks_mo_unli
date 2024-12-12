@@ -5,7 +5,11 @@ import 'login_screen.dart';
 import '../widgets/styled_button.dart';
 
 class EmployeeIdScreen extends StatefulWidget {
-  const EmployeeIdScreen({super.key});
+  final String? storedEmployeeId;
+  final String? storedUserName;
+
+  const EmployeeIdScreen(
+      {super.key, this.storedEmployeeId, this.storedUserName});
 
   @override
   _EmployeeIdScreenState createState() => _EmployeeIdScreenState();
@@ -21,26 +25,22 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
   @override
   void initState() {
     super.initState();
-    _checkStoredEmployeeId();
+    if (widget.storedEmployeeId != null && widget.storedUserName != null) {
+      _controller.text = widget.storedEmployeeId!;
+      _navigateToLoginScreen(widget.storedEmployeeId!, widget.storedUserName!);
+    }
   }
 
-  /// Check if an EmployeeID is already stored
-  Future<void> _checkStoredEmployeeId() async {
-    final String? storedEmployeeId =
-        await _secureStorage.read(key: 'employeeID');
-    final String? storedUserName = await _secureStorage.read(key: 'username');
-    if (storedEmployeeId != null && storedUserName != null) {
-      // Navigate directly to LoginScreen with the stored EmployeeID
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => LoginScreen(
-            userName: storedUserName, // Username will be fetched later
-            employeeId: storedEmployeeId,
-          ),
+  void _navigateToLoginScreen(String employeeId, String userName) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(
+          userName: userName,
+          employeeId: employeeId,
         ),
-      );
-    }
+      ),
+    );
   }
 
   /// Validate the entered EmployeeID with Firestore
@@ -64,15 +64,9 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
         if (user != null) {
           // Save EmployeeID in secure storage
           await _secureStorage.write(key: 'employeeID', value: employeeId);
-          await _secureStorage.write(key: 'username', value: user['name']);
+          await _secureStorage.write(key: 'username', value: user['firstName']);
           // Navigate to LoginScreen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  LoginScreen(userName: user['name'], employeeId: employeeId),
-            ),
-          );
+          _navigateToLoginScreen(employeeId, user['firstName']);
         } else {
           _showDialog(context, 'Error', 'User data is null');
         }

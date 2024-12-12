@@ -11,19 +11,27 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        ProfileInfo(
-          username: authProvider.name,
-          id: authProvider.employeeId,
-          type: authProvider.userType,
-          phone: authProvider.phoneNumber,
-          email: authProvider.email,
-          facebook: authProvider.facebook,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              ProfileInfo(
+                username: authProvider.name,
+                id: authProvider.employeeId,
+                type: authProvider.userType,
+                phone: authProvider.phoneNumber,
+                email: authProvider.email,
+                facebook: authProvider.facebook,
+              ),
+              ClockInSection(id: authProvider.employeeId),
+            ],
+          ),
         ),
-        ClockInSection(id: authProvider.employeeId),
-      ],
+      ),
     );
   }
 }

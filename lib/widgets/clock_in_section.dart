@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:chicks_mo_unli/pages/auth_page.dart';
 
 class ClockInSection extends StatelessWidget {
   final String id;
 
   const ClockInSection({super.key, required this.id});
-
-  void logOut() {
-    // Implement the log out functionality here
-    print('User logged out');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +14,7 @@ class ClockInSection extends StatelessWidget {
       child: Column(
         children: [
           SetupAccountButton(), // replace the existing button with the new widget
-          SizedBox(height: 5),
+          SizedBox(height: 20),
           ClockStatusWidget(), // replace the existing clock status with the new widget
           SizedBox(height: 20),
           LogoutButton(), // replace the existing log out button with the new widget
@@ -103,23 +100,36 @@ class ClockStatusWidget extends StatelessWidget {
 class LogoutButton extends StatelessWidget {
   const LogoutButton({Key? key}) : super(key: key);
 
+  Future<void> _logOut(BuildContext context) async {
+    final storage = FlutterSecureStorage();
+    await storage.delete(key: 'employeeID');
+    await storage.delete(key: 'username');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => AuthPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 359),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFEF00),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 117),
-        child: Text(
-          'Log out',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.2,
-            height: 1,
+    return GestureDetector(
+      onTap: () => _logOut(context),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 359),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFEF00),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 117),
+          child: Text(
+            'Log out',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.2,
+              height: 1,
+            ),
           ),
         ),
       ),

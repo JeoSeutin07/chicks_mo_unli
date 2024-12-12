@@ -7,7 +7,7 @@ import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
 import 'Owner/owner_page.dart';
 import 'Cash_Flow/Cash_Flow.dart';
 import 'profile_page.dart';
-import '../widgets/profile_header.dart';
+import '../widgets/header.dart';
 
 class PageTitle extends StatelessWidget {
   final String title;
