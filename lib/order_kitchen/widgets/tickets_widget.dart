@@ -44,8 +44,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
             child: Text(
               'On-Going Tickets',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontSize: 15, // Increased font size for header
+                fontWeight: FontWeight.bold, // Bold font weight for header
                 fontFamily: 'Roboto',
               ),
             ),
@@ -134,34 +134,36 @@ class OrderTicket extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 72,
-      margin: const EdgeInsets.only(right: 10, top: 5, bottom: 5),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      child: Material(
         color: const Color(0xFFFBD663),
         borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Table #${order.tableNumber}',
-            style: const TextStyle(
-              fontSize: 11,
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.bold,
-            ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Table #${order.tableNumber}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              ...order.items
+                  .map((item) => Text(
+                        item.title,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontFamily: 'Inter',
+                        ),
+                      ))
+                  .toList(),
+            ],
           ),
-          const SizedBox(height: 4),
-          ...order.items
-              .map((item) => Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontFamily: 'Inter',
-                    ),
-                  ))
-              .toList(),
-        ],
+        ),
       ),
     );
   }

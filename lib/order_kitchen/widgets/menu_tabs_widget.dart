@@ -22,29 +22,6 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
     });
   }
 
-  List<Widget> tabs = const [
-    Tab(text: 'Menu'),
-    Tab(text: 'Queue'),
-    Tab(text: 'Served'),
-  ];
-
-  List<Widget> tabViews = [];
-
-  @override
-  void initState() {
-    super.initState();
-    tabViews = [
-      MenuTabContent(
-        onItemSelected: (item) {
-          // Handle item selection
-          print("Selected: ${item.title}");
-        },
-      ),
-      const Center(child: Text('Queue Content')),
-      const Center(child: Text('Served Content')),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -54,23 +31,33 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
           currentTableNumber: currentTableNumber,
           onAddOrder: addOrder,
         ),
-        DefaultTabController(
-          length: tabs.length,
-          child: Expanded(
+        Expanded(
+          child: DefaultTabController(
+            length: 3,
             child: Column(
               children: [
                 TabBar(
-                  tabs: tabs,
+                  tabs: const [
+                    Tab(text: 'Menu'),
+                    Tab(text: 'Queue'),
+                    Tab(text: 'Served'),
+                  ],
                   labelColor: Colors.black,
                   unselectedLabelColor: Colors.black54,
                   indicatorColor: const Color(0xFFFFF55E),
                 ),
                 Expanded(
-                  child: Container(
-                    color: const Color(0xFFFFF894),
-                    child: TabBarView(
-                      children: tabViews,
-                    ),
+                  child: TabBarView(
+                    children: [
+                      MenuTabContent(
+                        onItemSelected: (item) {
+                          // Handle item selection
+                          print("Selected: ${item.title}");
+                        },
+                      ),
+                      const Center(child: Text('Queue Content')),
+                      const Center(child: Text('Served Content')),
+                    ],
                   ),
                 ),
               ],
