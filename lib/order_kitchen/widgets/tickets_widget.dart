@@ -63,7 +63,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                       vertical: 5, horizontal: 5), // Add horizontal margin
                   child: Material(
                     color: const Color(
-                        0xFFFBD663), // Updated color to match branding
+                        0xFFE02C34), // Updated color to match branding
                     borderRadius: BorderRadius.circular(8),
                     child: InkWell(
                       onTap: () => showOrderTypeDialog(context),
@@ -76,6 +76,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                           style: TextStyle(
                             fontSize: 11,
                             fontFamily: 'Inter',
+                            fontWeight:
+                                FontWeight.w600, // Slightly bolder font weight
                           ),
                         ),
                       ),
@@ -218,7 +220,7 @@ class OrderTicket extends StatelessWidget {
       width: 72,
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: Material(
-        color: const Color(0xFFFFEF00), // Updated color to match branding
+        color: const Color(0xFFFF5E5E), // Updated color to match branding
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(10),
