@@ -57,6 +57,8 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
               currentTableNumber: currentTableNumber,
               onAddOrder: addOrder,
             ),
+            const SizedBox(
+                height: 10), // Add spacing between TicketsWidget and tabs
             DefaultTabController(
               length: tabs.length,
               child: Expanded(

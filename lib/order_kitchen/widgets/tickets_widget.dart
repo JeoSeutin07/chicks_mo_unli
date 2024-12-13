@@ -44,7 +44,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
             child: Text(
               'On-Going Tickets',
               style: TextStyle(
-                fontSize: 15, // Increased font size for header
+                fontSize: 18, // Slightly reduced font size for header
                 fontWeight: FontWeight.bold, // Bold font weight for header
                 fontFamily: 'Roboto',
               ),
@@ -145,6 +145,15 @@ class OrderTicket extends StatelessWidget {
             children: [
               Text(
                 'Table #${order.tableNumber}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${order.timestamp.hour.toString().padLeft(2, '0')}:${order.timestamp.minute.toString().padLeft(2, '0')}',
                 style: const TextStyle(
                   fontSize: 11,
                   fontFamily: 'Inter',
