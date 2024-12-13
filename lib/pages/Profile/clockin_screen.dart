@@ -6,8 +6,10 @@ import 'widgets/clock_dialog_manager.dart';
 
 class ClockInScreen extends StatefulWidget {
   final String employeeId;
+  final bool isClockingIn;
 
-  const ClockInScreen({super.key, required this.employeeId});
+  const ClockInScreen(
+      {super.key, required this.employeeId, required this.isClockingIn});
 
   @override
   ClockInScreenState createState() => ClockInScreenState();
@@ -22,7 +24,7 @@ class ClockInScreenState extends State<ClockInScreen> {
     super.initState();
   }
 
-  Future<void> _clockin(String pin, BuildContext context) async {
+  Future<void> _handleClockInOut(String pin, BuildContext context) async {
     if (_isDialogShowing) return;
 
     try {
@@ -33,17 +35,66 @@ class ClockInScreenState extends State<ClockInScreen> {
           .where('clockInOutPin', isEqualTo: parsedPin)
           .get();
 
-      print("Query result: ${result.docs}");
-
       final List<DocumentSnapshot> documents = result.docs;
       if (documents.isNotEmpty) {
         final user = documents.first.data() as Map<String, dynamic>?;
 
         if (user != null) {
-          // Navigate back to mainpage.dart
+          final attendanceRef = FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.employeeId)
+              .collection('attendance');
+
+          if (widget.isClockingIn) {
+            // Clock-In Logic
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.employeeId)
+                .update({
+              'clockedIn': true,
+              'lastClockIn': Timestamp.now(),
+            });
+
+            await attendanceRef
+                .doc(Timestamp.now().millisecondsSinceEpoch.toString())
+                .set({
+              'clockInTime': Timestamp.now(),
+              'clockOutTime': null, // Set later when clocking out
+              'status': 'clockedIn',
+            });
+
+            ClockDialogManager.showClockInSuccess(context);
+          } else {
+            // Clock-Out Logic
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.employeeId)
+                .update({
+              'clockedIn': false,
+            });
+
+            // Query for the latest clock-in record with clockOutTime == null
+            final query = await attendanceRef
+                .where('clockOutTime', isEqualTo: null)
+                .orderBy('clockInTime', descending: true)
+                .limit(1)
+                .get();
+
+            if (query.docs.isNotEmpty) {
+              final doc = query.docs.first;
+              await doc.reference.update({
+                'clockOutTime': Timestamp.now(),
+                'status': 'clockedOut',
+              });
+
+              ClockDialogManager.showClockOutSuccess(context);
+            } else {
+              _showDialog(context, 'Error', 'No active clock-in record found.');
+            }
+          }
+
+          // Navigate back to the previous screen
           Navigator.of(context).pop();
-          // Show success dialog
-          ClockDialogManager.showClockInSuccess(context);
         } else {
           _showDialog(context, 'Error', 'User data is null');
         }
@@ -51,7 +102,7 @@ class ClockInScreenState extends State<ClockInScreen> {
         _showDialog(context, 'Error', 'Invalid PIN');
       }
     } catch (e) {
-      _showDialog(context, 'Error', 'Error clocking in: $e');
+      _showDialog(context, 'Error', 'Error clocking in/out: $e');
     }
   }
 
@@ -101,9 +152,9 @@ class ClockInScreenState extends State<ClockInScreen> {
                         width: 355,
                         child: Column(
                           children: [
-                            const Text(
-                              'Clock In',
-                              style: TextStyle(
+                            Text(
+                              widget.isClockingIn ? 'Clock In' : 'Clock Out',
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.2,
@@ -116,14 +167,14 @@ class ClockInScreenState extends State<ClockInScreen> {
                                 onChanged: (pin) {
                                   if (pin.length == 6 && !_isClockInTriggered) {
                                     _isClockInTriggered = true;
-                                    _clockin(pin, context).then((_) {
+                                    _handleClockInOut(pin, context).then((_) {
                                       _isClockInTriggered = false;
                                     });
                                   }
                                 },
                                 onSubmit: (pin) {
                                   if (!_isClockInTriggered) {
-                                    _clockin(pin, context);
+                                    _handleClockInOut(pin, context);
                                   }
                                 },
                               ),

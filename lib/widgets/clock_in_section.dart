@@ -5,6 +5,7 @@ import 'package:chicks_mo_unli/pages/auth_page.dart';
 import 'package:chicks_mo_unli/pages/Profile/clockin_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:chicks_mo_unli/pages/Profile/widgets/setup_account.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ClockInSection extends StatelessWidget {
   final String employeeId;
@@ -100,33 +101,74 @@ class ClockStatusWidget extends StatefulWidget {
 }
 
 class _ClockStatusWidgetState extends State<ClockStatusWidget> {
-  void _navigateToClockInScreen() {
+  bool _isClockedIn = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchClockStatus();
+  }
+
+  Future<void> _fetchClockStatus() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.employeeId)
+        .get();
+    setState(() {
+      _isClockedIn = doc['clockedIn'] ?? false;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _clockIn() async {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ClockInScreen(employeeId: widget.employeeId),
+        builder: (context) =>
+            ClockInScreen(employeeId: widget.employeeId, isClockingIn: true),
       ),
-    );
+    ).then((_) {
+      _fetchClockStatus(); // Refresh clock status after returning from ClockInScreen
+    });
+  }
+
+  Future<void> _clockOut() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ClockInScreen(employeeId: widget.employeeId, isClockingIn: false),
+      ),
+    ).then((_) {
+      _fetchClockStatus(); // Refresh clock status after returning from ClockInScreen
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const CircularProgressIndicator();
+    }
+
     return Container(
       width: 217,
       child: Column(
         children: [
           GestureDetector(
-            onTap: _navigateToClockInScreen,
+            onTap: _isClockedIn ? _clockOut : _clockIn,
             child: Container(
               height: 150,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFEF00),
+                color: _isClockedIn
+                    ? const Color(0xFFE74C3C)
+                    : const Color(0xFFFFEF00),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'Clock In',
-                  style: TextStyle(
+                  _isClockedIn ? 'Clock Out' : 'Clock In',
+                  style: const TextStyle(
                     fontSize: 48,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.48,
@@ -137,9 +179,9 @@ class _ClockStatusWidgetState extends State<ClockStatusWidget> {
             ),
           ),
           const SizedBox(height: 5),
-          const Text(
-            'Current Status: Clocked out',
-            style: TextStyle(
+          Text(
+            'Current Status: ${_isClockedIn ? 'Clocked In' : 'Clocked Out'}',
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
               letterSpacing: 0.16,
