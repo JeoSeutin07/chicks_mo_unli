@@ -67,7 +67,7 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
                       labelColor: Colors.black,
                       unselectedLabelColor: Colors.black54,
                       indicator: BoxDecoration(
-                        color: const Color(0xFFFFF55E), // Highlighted tab color
+                        color: const Color(0xFFFFF894), // Highlighted tab color
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(16),
                           topRight: Radius.circular(16),
@@ -79,7 +79,7 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
                     Expanded(
                       child: Container(
                         color: const Color(
-                            0xFFFFF55E), // Background color same as selected tab
+                            0xFFFFF894), // Background color same as selected tab
                         child: TabBarView(
                           children: tabViews,
                         ),
