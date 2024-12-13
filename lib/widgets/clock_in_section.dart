@@ -1,52 +1,85 @@
+import 'package:chicks_mo_unli/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chicks_mo_unli/pages/auth_page.dart';
+import 'package:chicks_mo_unli/pages/Profile/clockin_screen.dart';
+import 'package:provider/provider.dart';
 
 class ClockInSection extends StatelessWidget {
-  final String id;
+  final String employeeId;
 
-  const ClockInSection({super.key, required this.id});
+  const ClockInSection({super.key, required this.employeeId});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Column(
         children: [
-          SetupAccountButton(), // replace the existing button with the new widget
-          SizedBox(height: 20),
-          ClockStatusWidget(), // replace the existing clock status with the new widget
-          SizedBox(height: 20),
-          LogoutButton(), // replace the existing log out button with the new widget
+          SetupAccountButton(), // SetupAccountButton no longer navigates to ClockInScreen
+          const SizedBox(height: 20),
+          ClockStatusWidget(
+              employeeId: employeeId), // Pass employeeId to ClockStatusWidget
+          const SizedBox(height: 20),
+          const LogoutButton(),
         ],
       ),
     );
   }
 }
 
-class SetupAccountButton extends StatelessWidget {
-  const SetupAccountButton({Key? key}) : super(key: key);
+class SetupAccountButton extends StatefulWidget {
+  const SetupAccountButton({super.key});
+
+  @override
+  _SetupAccountButtonState createState() => _SetupAccountButtonState();
+}
+
+class _SetupAccountButtonState extends State<SetupAccountButton> {
+  Color _buttonColor = const Color(0xFFFFF3CB);
+
+  void _setupAccount() {
+    // Account setup logic here
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Setup account action performed')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(maxWidth: 258),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF3CB),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.black),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 83),
-        child: Text(
-          'Set Up Account',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.12,
-            height: 2,
+    return InkWell(
+      onTap: _setupAccount,
+      onTapDown: (_) {
+        setState(() {
+          _buttonColor = const Color(0xFFCCC2A2);
+        });
+      },
+      onTapUp: (_) {
+        setState(() {
+          _buttonColor = const Color(0xFFFFF3CB);
+        });
+      },
+      splashColor: Colors.black.withOpacity(0.2),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 258),
+        decoration: BoxDecoration(
+          color: _buttonColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.black),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 83),
+          child: Text(
+            'Set Up Account',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.12,
+              height: 2,
+            ),
           ),
         ),
       ),
@@ -54,8 +87,24 @@ class SetupAccountButton extends StatelessWidget {
   }
 }
 
-class ClockStatusWidget extends StatelessWidget {
-  const ClockStatusWidget({Key? key}) : super(key: key);
+class ClockStatusWidget extends StatefulWidget {
+  final String employeeId;
+
+  const ClockStatusWidget({super.key, required this.employeeId});
+
+  @override
+  _ClockStatusWidgetState createState() => _ClockStatusWidgetState();
+}
+
+class _ClockStatusWidgetState extends State<ClockStatusWidget> {
+  void _navigateToClockInScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ClockInScreen(employeeId: widget.employeeId),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,20 +112,23 @@ class ClockStatusWidget extends StatelessWidget {
       width: 217,
       child: Column(
         children: [
-          Container(
-            height: 150,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFEF00),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Center(
-              child: Text(
-                'Clock In',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.48,
-                  height: 20 / 48,
+          GestureDetector(
+            onTap: _navigateToClockInScreen,
+            child: Container(
+              height: 150,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEF00),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: Text(
+                  'Clock In',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.48,
+                    height: 20 / 48,
+                  ),
                 ),
               ),
             ),
@@ -98,12 +150,20 @@ class ClockStatusWidget extends StatelessWidget {
 }
 
 class LogoutButton extends StatelessWidget {
-  const LogoutButton({Key? key}) : super(key: key);
+  const LogoutButton({super.key});
 
   Future<void> _logOut(BuildContext context) async {
     final storage = FlutterSecureStorage();
+
+    // Clear stored data
     await storage.delete(key: 'employeeID');
     await storage.delete(key: 'username');
+
+    // Clear the credentials in AuthProvider
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.clearCredentials();
+
+    // Navigate to the AuthPage after logout
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => AuthPage()),

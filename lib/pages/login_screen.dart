@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import './widgets/pin_input.dart';
 import 'main_page.dart';
 import 'employee_id_screen.dart'; // Add this import
+import '../providers/auth_provider.dart'; // Add this import
 
 class LoginScreen extends StatefulWidget {
   final String userName;
@@ -49,7 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
         final user = documents.first.data() as Map<String, dynamic>?;
 
         if (user != null) {
-          Navigator.push(
+          final authProvider =
+              Provider.of<AuthProvider>(context, listen: false);
+          await authProvider.setCredentials(widget.employeeId, pin);
+
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => MainPage()),
           );
