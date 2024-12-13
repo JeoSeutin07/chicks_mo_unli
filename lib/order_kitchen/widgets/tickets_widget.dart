@@ -64,7 +64,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                   margin: const EdgeInsets.symmetric(vertical: 5),
                   child: Material(
                     color: const Color(
-                        0xFFFFEF00), // Updated color to match branding
+                        0xFFFBD663), // Updated color to match branding
                     borderRadius: BorderRadius.circular(8),
                     child: InkWell(
                       onTap: () => showOrderTypeDialog(context),
@@ -99,7 +99,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFF894), // Set background color
+        backgroundColor: const Color(0xFFFFF3CB), // Set background color
         title: const Text('Select Order Type'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -166,7 +166,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFF894), // Set background color
+        backgroundColor: const Color(0xFFFFF3CB), // Set background color
         title: Text(
             'Table #${widget.currentTableNumber} Order ($selectedOrderType)'),
         content: SizedBox(
@@ -214,19 +214,12 @@ class OrderTicket extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Center align the content
             children: [
               Text(
                 'Table #${order.tableNumber}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${order.timestamp.hour.toString().padLeft(2, '0')}:${order.timestamp.minute.toString().padLeft(2, '0')}',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 11,
                   fontFamily: 'Inter',
@@ -236,6 +229,7 @@ class OrderTicket extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 order.orderType,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 11,
                   fontFamily: 'Inter',
@@ -246,6 +240,7 @@ class OrderTicket extends StatelessWidget {
               ...order.items
                   .map((item) => Text(
                         item.title,
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 11,
                           fontFamily: 'Inter',
