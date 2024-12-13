@@ -116,7 +116,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                   selectedOrderType = 'Dine In';
                 });
                 Navigator.pop(context);
-                widget.onAddOrder(currentTableNumber++, selectedOrderType);
+                showTableNumberDialog(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Dine In'
@@ -138,7 +138,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                   selectedOrderType = 'Takeout';
                 });
                 Navigator.pop(context);
-                widget.onAddOrder(currentTableNumber++, selectedOrderType);
+                widget.onAddOrder(
+                    0, selectedOrderType); // No table number for Takeout
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Takeout'
@@ -161,6 +162,21 @@ class _TicketsWidgetState extends State<TicketsWidget> {
             child: const Text('Cancel'),
           ),
         ],
+      ),
+    );
+  }
+
+  void showTableNumberDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFFFF3CB), // Set background color
+        content: TableNumberPad(
+          onConfirm: (tableNumber) {
+            widget.onAddOrder(tableNumber, selectedOrderType);
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
@@ -230,6 +246,161 @@ class OrderTicket extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TableNumberPad extends StatefulWidget {
+  final Function(int) onConfirm;
+
+  const TableNumberPad({super.key, required this.onConfirm});
+
+  @override
+  _TableNumberPadState createState() => _TableNumberPadState();
+}
+
+class _TableNumberPadState extends State<TableNumberPad> {
+  String displayValue = '0';
+
+  void _updateDisplay(String value) {
+    setState(() {
+      if (displayValue == '0') {
+        displayValue = value;
+      } else {
+        displayValue += value;
+      }
+    });
+  }
+
+  void _confirm() {
+    widget.onConfirm(int.parse(displayValue));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: const Color.fromRGBO(255, 243, 203, 1),
+        border: Border.all(color: Colors.black),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '--Assign Table Number--',
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              letterSpacing: 0.14,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: const Color.fromRGBO(255, 248, 148, 0.98),
+            ),
+            child: Text(
+              displayValue,
+              style: const TextStyle(
+                fontSize: 14,
+                letterSpacing: 0.14,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Column(
+            children: [
+              _buildNumberRow(['1', '2', '3']),
+              const SizedBox(height: 10),
+              _buildNumberRow(['4', '5', '6']),
+              const SizedBox(height: 10),
+              _buildNumberRow(['7', '8', '9']),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildNumberButton('0'),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        displayValue = displayValue.length > 1
+                            ? displayValue.substring(0, displayValue.length - 1)
+                            : '0';
+                      });
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: const Color.fromRGBO(255, 243, 203, 1),
+                      ),
+                      child: const Icon(Icons.backspace, size: 24),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: _confirm,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: const Color.fromRGBO(255, 239, 0, 1),
+              ),
+              child: const Text(
+                'Confirm',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumberRow(List<String> numbers) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: numbers.map((number) => _buildNumberButton(number)).toList(),
+    );
+  }
+
+  Widget _buildNumberButton(String number) {
+    return GestureDetector(
+      onTap: () => _updateDisplay(number),
+      child: Container(
+        width: 60,
+        height: 60,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: const Color.fromRGBO(255, 243, 203, 1),
+        ),
+        child: Text(
+          number,
+          style: const TextStyle(
+            fontSize: 14,
+            letterSpacing: 0.14,
           ),
         ),
       ),
