@@ -286,7 +286,6 @@ class _TableNumberPadState extends State<TableNumberPad> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: const Color.fromRGBO(255, 243, 203, 1),
-        border: Border.all(color: Colors.black),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
