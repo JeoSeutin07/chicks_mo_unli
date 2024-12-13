@@ -7,29 +7,9 @@ import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
 import 'Owner/owner_page.dart';
 import 'Cash_Flow/Cash_Flow.dart';
 import 'profile_page.dart';
-import '../widgets/header.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'auth_page.dart'; // Import AuthPage for navigation
-
-class PageTitle extends StatelessWidget {
-  final String title;
-
-  const PageTitle({required this.title, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-    );
-  }
-}
+import '../widgets/header.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -102,6 +82,18 @@ class _MainPageState extends State<MainPage> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 35,
+        centerTitle: true,
+        backgroundColor: const Color(0xFFFFF3CB),
+        title: Text(
+          _getPageTitle(_activeIndex),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
@@ -111,9 +103,6 @@ class _MainPageState extends State<MainPage> {
           children: [
             Container(
               child: ProfileHeader(userName: authProvider.name),
-            ),
-            Container(
-              child: PageTitle(title: _getPageTitle(_activeIndex)),
             ),
             Expanded(
               child: Container(

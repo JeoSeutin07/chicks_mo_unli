@@ -40,14 +40,12 @@ class AuthProvider with ChangeNotifier {
 
   // Fetch user credentials
 
-  Future<void> setCredentials(String employeeId, String pin) async {
+  Future<void> setCredentials(String employeeId) async {
     try {
       // Fetch the user document matching EmployeeID and pin
       final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('users')
           .where('EmployeeID', isEqualTo: employeeId)
-          .where('pin',
-              isEqualTo: int.parse(pin)) // Assuming 'pin' is stored as int
           .get();
 
       final List<DocumentSnapshot> documents = result.docs;

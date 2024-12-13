@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chicks_mo_unli/pages/auth_page.dart';
 import 'package:chicks_mo_unli/pages/Profile/clockin_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:chicks_mo_unli/pages/Profile/widgets/setup_account.dart';
 
 class ClockInSection extends StatelessWidget {
   final String employeeId;
@@ -39,9 +40,11 @@ class _SetupAccountButtonState extends State<SetupAccountButton> {
   Color _buttonColor = const Color(0xFFFFF3CB);
 
   void _setupAccount() {
-    // Account setup logic here
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Setup account action performed')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SetupAccountScreen(),
+      ),
     );
   }
 

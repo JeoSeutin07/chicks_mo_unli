@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user != null) {
           final authProvider =
               Provider.of<AuthProvider>(context, listen: false);
-          await authProvider.setCredentials(widget.employeeId, pin);
+          await authProvider.setCredentials(widget.employeeId);
 
           Navigator.pushReplacement(
             context,
