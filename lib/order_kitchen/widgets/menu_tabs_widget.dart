@@ -12,11 +12,11 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
   List<Order> orders = [];
   int currentTableNumber = 1;
 
-  void addOrder(List<MenuItem> items, String orderType) {
+  void addOrder(int tableNumber, String orderType) {
     setState(() {
       orders.add(Order(
-        tableNumber: currentTableNumber++,
-        items: items,
+        tableNumber: tableNumber,
+        items: [],
         timestamp: DateTime.now(),
         orderType: orderType,
       ));
@@ -38,7 +38,9 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
       MenuTabContent(
         onItemSelected: (item) {
           // Handle item selection
-          print("Selected: ${item.title}");
+          setState(() {
+            orders.last.items.add(item);
+          });
         },
       ),
       const Center(child: Text('Queue Content')),
@@ -55,7 +57,6 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
           children: [
             TicketsWidget(
               orders: orders,
-              currentTableNumber: currentTableNumber,
               onAddOrder: addOrder,
             ),
             const SizedBox(

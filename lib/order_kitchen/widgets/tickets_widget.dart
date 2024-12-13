@@ -17,13 +17,11 @@ class Order {
 
 class TicketsWidget extends StatefulWidget {
   final List<Order> orders;
-  final int currentTableNumber;
-  final Function(List<MenuItem>, String) onAddOrder;
+  final Function(int, String) onAddOrder;
 
   const TicketsWidget({
     super.key,
     required this.orders,
-    required this.currentTableNumber,
     required this.onAddOrder,
   });
 
@@ -32,8 +30,8 @@ class TicketsWidget extends StatefulWidget {
 }
 
 class _TicketsWidgetState extends State<TicketsWidget> {
-  List<MenuItem> selectedItems = [];
   String selectedOrderType = 'Dine In';
+  int currentTableNumber = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +83,10 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                 ),
                 const SizedBox(width: 10), // Add spacing between buttons
                 ...widget.orders
-                    .map((order) => OrderTicket(order: order))
+                    .map((order) => GestureDetector(
+                          onTap: () => showOrderSummaryDialog(context, order),
+                          child: OrderTicket(order: order),
+                        ))
                     .toList(),
               ],
             ),
@@ -109,6 +110,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                 setState(() {
                   selectedOrderType = 'Dine In';
                 });
+                Navigator.pop(context);
+                widget.onAddOrder(currentTableNumber++, selectedOrderType);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Dine In'
@@ -129,6 +132,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                 setState(() {
                   selectedOrderType = 'Takeout';
                 });
+                Navigator.pop(context);
+                widget.onAddOrder(currentTableNumber++, selectedOrderType);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Takeout'
@@ -150,47 +155,30 @@ class _TicketsWidgetState extends State<TicketsWidget> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              showOrderDialog(context);
-            },
-            child: const Text('Confirm'),
-          ),
         ],
       ),
     );
   }
 
-  void showOrderDialog(BuildContext context) {
+  void showOrderSummaryDialog(BuildContext context, Order order) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFFF3CB), // Set background color
-        title: Text(
-            'Table #${widget.currentTableNumber} Order ($selectedOrderType)'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: MenuTabContent(
-            onItemSelected: (item) {
-              setState(() {
-                selectedItems.add(item);
-              });
-            },
-          ),
+        title: Text('Order Summary for Table #${order.tableNumber}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: order.items
+              .map((item) => ListTile(
+                    title: Text(item.title),
+                    trailing: Text(item.price),
+                  ))
+              .toList(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              widget.onAddOrder(selectedItems, selectedOrderType);
-              selectedItems.clear();
-              Navigator.pop(context);
-            },
-            child: const Text('Create Order'),
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -236,17 +224,6 @@ class OrderTicket extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
-              ...order.items
-                  .map((item) => Text(
-                        item.title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontFamily: 'Inter',
-                        ),
-                      ))
-                  .toList(),
             ],
           ),
         ),
