@@ -59,7 +59,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
               children: [
                 Container(
                   width: 72,
-                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 5, horizontal: 5), // Add horizontal margin
                   child: Material(
                     color: const Color(
                         0xFFFBD663), // Updated color to match branding
@@ -85,7 +86,11 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                 ...widget.orders
                     .map((order) => GestureDetector(
                           onTap: () => showOrderSummaryDialog(context, order),
-                          child: OrderTicket(order: order),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 5), // Add horizontal margin
+                            child: OrderTicket(order: order),
+                          ),
                         ))
                     .toList(),
               ],
