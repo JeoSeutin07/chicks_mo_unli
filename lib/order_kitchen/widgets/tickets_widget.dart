@@ -5,18 +5,20 @@ class Order {
   final int tableNumber;
   final List<MenuItem> items;
   final DateTime timestamp;
+  final String orderType;
 
   Order({
     required this.tableNumber,
     required this.items,
     required this.timestamp,
+    required this.orderType,
   });
 }
 
 class TicketsWidget extends StatefulWidget {
   final List<Order> orders;
   final int currentTableNumber;
-  final Function(List<MenuItem>) onAddOrder;
+  final Function(List<MenuItem>, String) onAddOrder;
 
   const TicketsWidget({
     super.key,
@@ -31,6 +33,7 @@ class TicketsWidget extends StatefulWidget {
 
 class _TicketsWidgetState extends State<TicketsWidget> {
   List<MenuItem> selectedItems = [];
+  String selectedOrderType = 'Dine In';
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +63,11 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                   width: 72,
                   margin: const EdgeInsets.symmetric(vertical: 5),
                   child: Material(
-                    color: const Color(0xFFFBD663),
+                    color: const Color(
+                        0xFFFFEF00), // Updated color to match branding
                     borderRadius: BorderRadius.circular(8),
                     child: InkWell(
-                      onTap: () => showOrderDialog(context),
+                      onTap: () => showOrderTypeDialog(context),
                       borderRadius: BorderRadius.circular(8),
                       child: const Padding(
                         padding: EdgeInsets.all(10),
@@ -91,11 +95,80 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     );
   }
 
+  void showOrderTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFFFF894), // Set background color
+        title: const Text('Select Order Type'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  selectedOrderType = 'Dine In';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: selectedOrderType == 'Dine In'
+                    ? const Color(0xFFFBD663) // Darker shade when selected
+                    : const Color(
+                        0xFFFFF894), // Lighter shade when not selected
+                foregroundColor: Colors.black,
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Dine In'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  selectedOrderType = 'Takeout';
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: selectedOrderType == 'Takeout'
+                    ? const Color(0xFFFBD663) // Darker shade when selected
+                    : const Color(
+                        0xFFFFF894), // Lighter shade when not selected
+                foregroundColor: Colors.black,
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Takeout'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              showOrderDialog(context);
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void showOrderDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Table #${widget.currentTableNumber} Order'),
+        backgroundColor: const Color(0xFFFFF894), // Set background color
+        title: Text(
+            'Table #${widget.currentTableNumber} Order ($selectedOrderType)'),
         content: SizedBox(
           width: double.maxFinite,
           child: MenuTabContent(
@@ -113,7 +186,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
           ),
           TextButton(
             onPressed: () {
-              widget.onAddOrder(selectedItems);
+              widget.onAddOrder(selectedItems, selectedOrderType);
               selectedItems.clear();
               Navigator.pop(context);
             },
@@ -136,7 +209,7 @@ class OrderTicket extends StatelessWidget {
       width: 72,
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: Material(
-        color: const Color(0xFFFBD663),
+        color: const Color(0xFFFFEF00), // Updated color to match branding
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(10),
@@ -154,6 +227,15 @@ class OrderTicket extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${order.timestamp.hour.toString().padLeft(2, '0')}:${order.timestamp.minute.toString().padLeft(2, '0')}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                order.orderType,
                 style: const TextStyle(
                   fontSize: 11,
                   fontFamily: 'Inter',

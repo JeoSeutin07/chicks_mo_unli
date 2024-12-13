@@ -12,12 +12,13 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
   List<Order> orders = [];
   int currentTableNumber = 1;
 
-  void addOrder(List<MenuItem> items) {
+  void addOrder(List<MenuItem> items, String orderType) {
     setState(() {
       orders.add(Order(
         tableNumber: currentTableNumber++,
         items: items,
         timestamp: DateTime.now(),
+        orderType: orderType,
       ));
     });
   }
