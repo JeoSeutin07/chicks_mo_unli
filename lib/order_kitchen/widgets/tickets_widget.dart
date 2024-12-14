@@ -298,7 +298,16 @@ class OrderTicket extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              // Removed the duplicate order.orderType text
+              if (order.orderType == 'Dine In')
+                Text(
+                  'Dine In',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
             ],
           ),
         ),
