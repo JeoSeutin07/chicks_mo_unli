@@ -190,7 +190,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
           onConfirm: (tableNumber) {
             if (tableNumber == 0) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                   content: Text('Please enter a valid table number.'),
                 ),
               );
@@ -298,15 +298,7 @@ class OrderTicket extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                order.orderType,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              // Removed the duplicate order.orderType text
             ],
           ),
         ),
