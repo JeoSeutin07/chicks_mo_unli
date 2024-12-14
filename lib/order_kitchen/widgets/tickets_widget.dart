@@ -88,14 +88,16 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                 const SizedBox(width: 5), // Adjusted spacing between buttons
                 ...widget.orders
                     .map((order) => GestureDetector(
-                          onTap: () => switchTable(order.tableNumber),
+                          onTap: () =>
+                              switchTable(order.tableNumber, order.orderType),
                           child: Container(
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 5), // Adjusted horizontal margin
                             child: OrderTicket(
                               order: order,
                               isSelected:
-                                  activeTableNumber == order.tableNumber,
+                                  activeTableNumber == order.tableNumber &&
+                                      selectedOrderType == order.orderType,
                             ),
                           ),
                         ))
@@ -145,8 +147,14 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                   selectedOrderType = 'Takeout';
                 });
                 Navigator.pop(context);
-                widget.onAddOrder(
-                    0, selectedOrderType); // No table number for Takeout
+                int takeoutNumber = widget.orders
+                        .where((order) => order.orderType == 'Takeout')
+                        .length +
+                    1;
+                widget.onAddOrder(takeoutNumber, 'Takeout');
+                setState(() {
+                  activeTableNumber = takeoutNumber;
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Takeout'
@@ -180,11 +188,21 @@ class _TicketsWidgetState extends State<TicketsWidget> {
         backgroundColor: const Color(0xFFFFF3CB), // Set background color
         content: TableNumberPad(
           onConfirm: (tableNumber) {
-            if (widget.orders
-                .any((order) => order.tableNumber == tableNumber)) {
+            if (tableNumber == 0) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Table #$tableNumber already exists.'),
+                  content: Text('Please enter a valid table number.'),
+                ),
+              );
+              return;
+            }
+            if (widget.orders.any((order) =>
+                order.tableNumber == tableNumber &&
+                order.orderType == 'Dine In')) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content:
+                      Text('Table #$tableNumber already exists for Dine In.'),
                 ),
               );
               return;
@@ -200,17 +218,21 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     );
   }
 
-  void switchTable(int tableNumber) {
+  void switchTable(int tableNumber, String orderType) {
     setState(() {
       activeTableNumber = tableNumber;
+      selectedOrderType = orderType;
     });
   }
 
   void showOrderSummaryDialog(BuildContext context, Order order) {
-    if (activeTableNumber != null && activeTableNumber != order.tableNumber) {
+    if (activeTableNumber != null &&
+        (activeTableNumber != order.tableNumber ||
+            selectedOrderType != order.orderType)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('You can only order for Table #$activeTableNumber'),
+          content: Text(
+              'You can only order for ${selectedOrderType == 'Takeout' ? 'Takeout #' : 'Table #'}$activeTableNumber'),
         ),
       );
       return;
@@ -220,7 +242,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFFF3CB), // Set background color
-        title: Text('Order Summary for Table #${order.tableNumber}'),
+        title: Text(
+            'Order Summary for ${order.orderType == 'Takeout' ? 'Takeout #' : 'Table #'}${order.tableNumber}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: order.items
@@ -254,7 +277,7 @@ class OrderTicket extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: Material(
         color: isSelected
-            ? const Color(0xFFB0E57C)
+            ? const Color(0xFFE02C34)
             : const Color(0xFFFF5E5E), // Change color if selected
         borderRadius: BorderRadius.circular(8),
         child: Padding(
@@ -264,7 +287,9 @@ class OrderTicket extends StatelessWidget {
                 CrossAxisAlignment.center, // Center align the content
             children: [
               Text(
-                'Table #${order.tableNumber}',
+                order.orderType == 'Takeout'
+                    ? 'Takeout #${order.tableNumber}'
+                    : 'Table #${order.tableNumber}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 11,
