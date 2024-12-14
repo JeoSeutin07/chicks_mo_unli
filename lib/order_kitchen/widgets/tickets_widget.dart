@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'menu_tabs_widget.dart';
+import 'order_details_screen.dart';
 
 class Order {
   final int tableNumber;
@@ -33,6 +34,15 @@ class _TicketsWidgetState extends State<TicketsWidget> {
   String selectedOrderType = 'Dine In';
   int currentTableNumber = 1;
   int? activeTableNumber;
+
+  void navigateToOrderDetails(Order order) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OrderDetailsScreen(order: order),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +108,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                               isSelected:
                                   activeTableNumber == order.tableNumber &&
                                       selectedOrderType == order.orderType,
+                              onDetailsTap: () => navigateToOrderDetails(order),
                             ),
                           ),
                         ))
@@ -267,8 +278,14 @@ class _TicketsWidgetState extends State<TicketsWidget> {
 class OrderTicket extends StatelessWidget {
   final Order order;
   final bool isSelected;
+  final VoidCallback onDetailsTap;
 
-  const OrderTicket({super.key, required this.order, this.isSelected = false});
+  const OrderTicket({
+    super.key,
+    required this.order,
+    this.isSelected = false,
+    required this.onDetailsTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -280,27 +297,19 @@ class OrderTicket extends StatelessWidget {
             ? const Color(0xFFE02C34)
             : const Color(0xFFFF5E5E), // Change color if selected
         borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.center, // Center align the content
-            children: [
-              Text(
-                order.orderType == 'Takeout'
-                    ? 'Takeout #${order.tableNumber}'
-                    : 'Table #${order.tableNumber}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              if (order.orderType == 'Dine In')
+        child: InkWell(
+          onTap: onDetailsTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Center align the content
+              children: [
                 Text(
-                  'Dine In',
+                  order.orderType == 'Takeout'
+                      ? 'Takeout #${order.tableNumber}'
+                      : 'Table #${order.tableNumber}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 11,
@@ -308,7 +317,19 @@ class OrderTicket extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-            ],
+                const SizedBox(height: 4),
+                if (order.orderType == 'Dine In')
+                  Text(
+                    'Dine In',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

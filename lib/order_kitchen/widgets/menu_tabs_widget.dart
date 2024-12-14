@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'tickets_widget.dart';
+import 'order_details_screen.dart';
 
 class MenuTabsWidget extends StatefulWidget {
   const MenuTabsWidget({super.key});
@@ -21,6 +22,18 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
         orderType: orderType,
       ));
     });
+  }
+
+  void showOrderDetailsDialog(Order order) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: OrderDetailsScreen(order: order),
+      ),
+    );
   }
 
   List<Widget> tabs = const [
@@ -48,6 +61,7 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
                       .add(item.copyWith(flavors: selectedFlavors));
                 });
                 Navigator.pop(context);
+                showOrderDetailsDialog(orders.last);
               },
             ),
           );
