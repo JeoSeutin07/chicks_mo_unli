@@ -3,13 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'widgets/pin_input.dart';
 import 'widgets/clock_dialog_manager.dart';
+import 'package:chicks_mo_unli/providers/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class ClockInScreen extends StatefulWidget {
   final String employeeId;
   final bool isClockingIn;
 
-  const ClockInScreen(
-      {super.key, required this.employeeId, required this.isClockingIn});
+  const ClockInScreen({
+    super.key,
+    required this.employeeId,
+    required this.isClockingIn,
+  });
 
   @override
   ClockInScreenState createState() => ClockInScreenState();
@@ -63,6 +68,10 @@ class ClockInScreenState extends State<ClockInScreen> {
               'status': 'clockedIn',
             });
 
+            // Set credentials after successful clock-in
+            Provider.of<AuthProvider>(context, listen: false)
+                .setCredentials(widget.employeeId);
+
             ClockDialogManager.showClockInSuccess(context);
           } else {
             // Clock-Out Logic
@@ -86,6 +95,10 @@ class ClockInScreenState extends State<ClockInScreen> {
                 'clockOutTime': Timestamp.now(),
                 'status': 'clockedOut',
               });
+
+              // Set credentials after successful clock-out
+              Provider.of<AuthProvider>(context, listen: false)
+                  .setCredentials(widget.employeeId);
 
               ClockDialogManager.showClockOutSuccess(context);
             } else {

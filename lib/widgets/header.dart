@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:chicks_mo_unli/providers/auth_provider.dart';
 
 class ProfileHeader extends StatefulWidget {
   final String userName;
@@ -14,6 +16,11 @@ class ProfileHeader extends StatefulWidget {
 class _ProfileHeaderState extends State<ProfileHeader> {
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final bool isClockedIn = authProvider.clockedIn;
+    final Color headerColor =
+        isClockedIn ? const Color(0xFFFFEF00) : const Color(0xFFE74C3C);
+
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
@@ -22,14 +29,14 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     return Column(
       children: [
         Container(
-          color: Color(0xFFE74C3C),
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          color: headerColor,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 widget.userName,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -38,7 +45,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               ),
               Text(
                 DateFormat('hh:mm a EEE MMM d').format(DateTime.now()),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -53,7 +60,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   }
 }
 
-//
 class PageTitle extends StatelessWidget {
   final String pageTitle;
 
@@ -80,7 +86,7 @@ class PageTitle extends StatelessWidget {
             child: Text(
               pageTitle,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black,
                 fontSize: 14,
                 fontFamily: 'Roboto',
