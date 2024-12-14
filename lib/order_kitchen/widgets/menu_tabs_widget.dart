@@ -321,10 +321,27 @@ class MenuItem {
   }
 }
 
-class FlavorSelectionScreen extends StatelessWidget {
+class FlavorSelectionScreen extends StatefulWidget {
   final Function(List<String>) onConfirm;
 
   const FlavorSelectionScreen({super.key, required this.onConfirm});
+
+  @override
+  _FlavorSelectionScreenState createState() => _FlavorSelectionScreenState();
+}
+
+class _FlavorSelectionScreenState extends State<FlavorSelectionScreen> {
+  List<String> selectedFlavors = [];
+
+  void toggleFlavor(String flavor) {
+    setState(() {
+      if (selectedFlavors.contains(flavor)) {
+        selectedFlavors.remove(flavor);
+      } else {
+        selectedFlavors.add(flavor);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -358,44 +375,136 @@ class FlavorSelectionScreen extends StatelessWidget {
                 spacing: 10,
                 runSpacing: 10,
                 alignment: WrapAlignment.center,
-                children: const [
-                  FlavorButton(label: 'Original'),
-                  FlavorButton(label: 'Creamy Cheese'),
-                  FlavorButton(label: 'Garlic parmesan'),
-                  FlavorButton(label: 'Garlicky Butter'),
-                  FlavorButton(label: "Jack Daniel's"),
-                  FlavorButton(label: 'Cheesy Chicks'),
-                  FlavorButton(label: 'Teriyaki'),
-                  FlavorButton(label: 'Garlic Mayo'),
-                  FlavorButton(label: 'Barbecue'),
-                  FlavorButton(label: 'Macao Wings'),
-                  FlavorButton(label: 'Salted Egg'),
-                  FlavorButton(label: 'Honey Lemon'),
-                  FlavorButton(label: 'Soy Garlic'),
-                  FlavorButton(label: 'Salt & Pepper'),
-                  FlavorButton(label: 'Jeju Wings'),
-                  FlavorButton(label: 'American Mustard'),
-                  FlavorButton(label: 'Vanila Cheese'),
-                  FlavorButton(label: 'Swiss Cheese'),
-                  FlavorButton(label: 'Hot Mayo'),
-                  FlavorButton(label: 'Spicy Hot'),
+                children: [
                   FlavorButton(
-                      label: 'Korean Spicy Chicken', isSmallText: true),
-                  FlavorButton(label: 'Buffalo Wings'),
-                  FlavorButton(label: 'Dynamite'),
-                  FlavorButton(label: 'Hell Wings'),
+                    label: 'Original',
+                    isSelected: selectedFlavors.contains('Original'),
+                    onTap: () => toggleFlavor('Original'),
+                  ),
+                  FlavorButton(
+                    label: 'Creamy Cheese',
+                    isSelected: selectedFlavors.contains('Creamy Cheese'),
+                    onTap: () => toggleFlavor('Creamy Cheese'),
+                  ),
+                  FlavorButton(
+                    label: 'Garlic parmesan',
+                    isSelected: selectedFlavors.contains('Garlic parmesan'),
+                    onTap: () => toggleFlavor('Garlic parmesan'),
+                  ),
+                  FlavorButton(
+                    label: 'Garlicky Butter',
+                    isSelected: selectedFlavors.contains('Garlicky Butter'),
+                    onTap: () => toggleFlavor('Garlicky Butter'),
+                  ),
+                  FlavorButton(
+                    label: "Jack Daniel's",
+                    isSelected: selectedFlavors.contains("Jack Daniel's"),
+                    onTap: () => toggleFlavor("Jack Daniel's"),
+                  ),
+                  FlavorButton(
+                    label: 'Cheesy Chicks',
+                    isSelected: selectedFlavors.contains('Cheesy Chicks'),
+                    onTap: () => toggleFlavor('Cheesy Chicks'),
+                  ),
+                  FlavorButton(
+                    label: 'Teriyaki',
+                    isSelected: selectedFlavors.contains('Teriyaki'),
+                    onTap: () => toggleFlavor('Teriyaki'),
+                  ),
+                  FlavorButton(
+                    label: 'Garlic Mayo',
+                    isSelected: selectedFlavors.contains('Garlic Mayo'),
+                    onTap: () => toggleFlavor('Garlic Mayo'),
+                  ),
+                  FlavorButton(
+                    label: 'Barbecue',
+                    isSelected: selectedFlavors.contains('Barbecue'),
+                    onTap: () => toggleFlavor('Barbecue'),
+                  ),
+                  FlavorButton(
+                    label: 'Macao Wings',
+                    isSelected: selectedFlavors.contains('Macao Wings'),
+                    onTap: () => toggleFlavor('Macao Wings'),
+                  ),
+                  FlavorButton(
+                    label: 'Salted Egg',
+                    isSelected: selectedFlavors.contains('Salted Egg'),
+                    onTap: () => toggleFlavor('Salted Egg'),
+                  ),
+                  FlavorButton(
+                    label: 'Honey Lemon',
+                    isSelected: selectedFlavors.contains('Honey Lemon'),
+                    onTap: () => toggleFlavor('Honey Lemon'),
+                  ),
+                  FlavorButton(
+                    label: 'Soy Garlic',
+                    isSelected: selectedFlavors.contains('Soy Garlic'),
+                    onTap: () => toggleFlavor('Soy Garlic'),
+                  ),
+                  FlavorButton(
+                    label: 'Salt & Pepper',
+                    isSelected: selectedFlavors.contains('Salt & Pepper'),
+                    onTap: () => toggleFlavor('Salt & Pepper'),
+                  ),
+                  FlavorButton(
+                    label: 'Jeju Wings',
+                    isSelected: selectedFlavors.contains('Jeju Wings'),
+                    onTap: () => toggleFlavor('Jeju Wings'),
+                  ),
+                  FlavorButton(
+                    label: 'American Mustard',
+                    isSelected: selectedFlavors.contains('American Mustard'),
+                    onTap: () => toggleFlavor('American Mustard'),
+                  ),
+                  FlavorButton(
+                    label: 'Vanila Cheese',
+                    isSelected: selectedFlavors.contains('Vanila Cheese'),
+                    onTap: () => toggleFlavor('Vanila Cheese'),
+                  ),
+                  FlavorButton(
+                    label: 'Swiss Cheese',
+                    isSelected: selectedFlavors.contains('Swiss Cheese'),
+                    onTap: () => toggleFlavor('Swiss Cheese'),
+                  ),
+                  FlavorButton(
+                    label: 'Hot Mayo',
+                    isSelected: selectedFlavors.contains('Hot Mayo'),
+                    onTap: () => toggleFlavor('Hot Mayo'),
+                  ),
+                  FlavorButton(
+                    label: 'Spicy Hot',
+                    isSelected: selectedFlavors.contains('Spicy Hot'),
+                    onTap: () => toggleFlavor('Spicy Hot'),
+                  ),
+                  FlavorButton(
+                    label: 'Korean Spicy Chicken',
+                    isSmallText: true,
+                    isSelected:
+                        selectedFlavors.contains('Korean Spicy Chicken'),
+                    onTap: () => toggleFlavor('Korean Spicy Chicken'),
+                  ),
+                  FlavorButton(
+                    label: 'Buffalo Wings',
+                    isSelected: selectedFlavors.contains('Buffalo Wings'),
+                    onTap: () => toggleFlavor('Buffalo Wings'),
+                  ),
+                  FlavorButton(
+                    label: 'Dynamite',
+                    isSelected: selectedFlavors.contains('Dynamite'),
+                    onTap: () => toggleFlavor('Dynamite'),
+                  ),
+                  FlavorButton(
+                    label: 'Hell Wings',
+                    isSelected: selectedFlavors.contains('Hell Wings'),
+                    onTap: () => toggleFlavor('Hell Wings'),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                // Collect selected flavors and pass them to the onConfirm callback
-                List<String> selectedFlavors = [
-                  'Original', // Example selected flavors
-                  'Garlic parmesan'
-                ];
-                onConfirm(selectedFlavors);
+                widget.onConfirm(selectedFlavors);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFFEF00),
@@ -423,32 +532,39 @@ class FlavorSelectionScreen extends StatelessWidget {
 class FlavorButton extends StatelessWidget {
   final String label;
   final bool isSmallText;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   const FlavorButton({
     super.key,
     required this.label,
     this.isSmallText = false,
+    this.isSelected = false,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 78,
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF894),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: isSmallText ? 11 : 14,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Roboto',
-            letterSpacing: isSmallText ? 0.11 : 0.14,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 78,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.green : const Color(0xFFFFF894),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isSmallText ? 11 : 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Roboto',
+              letterSpacing: isSmallText ? 0.11 : 0.14,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ),
     );
