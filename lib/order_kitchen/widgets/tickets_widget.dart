@@ -32,6 +32,7 @@ class TicketsWidget extends StatefulWidget {
 class _TicketsWidgetState extends State<TicketsWidget> {
   String selectedOrderType = 'Dine In';
   int currentTableNumber = 1;
+  int? activeTableNumber;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +52,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5), // Adjusted spacing
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -60,7 +61,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                 Container(
                   width: 72,
                   margin: const EdgeInsets.symmetric(
-                      vertical: 5, horizontal: 5), // Add horizontal margin
+                      vertical: 5, horizontal: 5), // Adjusted horizontal margin
                   child: Material(
                     color: const Color(
                         0xFFE02C34), // Updated color to match branding
@@ -84,14 +85,18 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10), // Add spacing between buttons
+                const SizedBox(width: 5), // Adjusted spacing between buttons
                 ...widget.orders
                     .map((order) => GestureDetector(
-                          onTap: () => showOrderSummaryDialog(context, order),
+                          onTap: () => switchTable(order.tableNumber),
                           child: Container(
                             margin: const EdgeInsets.symmetric(
-                                horizontal: 5), // Add horizontal margin
-                            child: OrderTicket(order: order),
+                                horizontal: 5), // Adjusted horizontal margin
+                            child: OrderTicket(
+                              order: order,
+                              isSelected:
+                                  activeTableNumber == order.tableNumber,
+                            ),
                           ),
                         ))
                     .toList(),
@@ -175,6 +180,18 @@ class _TicketsWidgetState extends State<TicketsWidget> {
         backgroundColor: const Color(0xFFFFF3CB), // Set background color
         content: TableNumberPad(
           onConfirm: (tableNumber) {
+            if (widget.orders
+                .any((order) => order.tableNumber == tableNumber)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Table #$tableNumber already exists.'),
+                ),
+              );
+              return;
+            }
+            setState(() {
+              activeTableNumber = tableNumber;
+            });
             widget.onAddOrder(tableNumber, selectedOrderType);
             Navigator.pop(context);
           },
@@ -183,7 +200,22 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     );
   }
 
+  void switchTable(int tableNumber) {
+    setState(() {
+      activeTableNumber = tableNumber;
+    });
+  }
+
   void showOrderSummaryDialog(BuildContext context, Order order) {
+    if (activeTableNumber != null && activeTableNumber != order.tableNumber) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You can only order for Table #$activeTableNumber'),
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -211,8 +243,9 @@ class _TicketsWidgetState extends State<TicketsWidget> {
 
 class OrderTicket extends StatelessWidget {
   final Order order;
+  final bool isSelected;
 
-  const OrderTicket({super.key, required this.order});
+  const OrderTicket({super.key, required this.order, this.isSelected = false});
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +253,9 @@ class OrderTicket extends StatelessWidget {
       width: 72,
       margin: const EdgeInsets.symmetric(vertical: 5),
       child: Material(
-        color: const Color(0xFFFF5E5E), // Updated color to match branding
+        color: isSelected
+            ? const Color(0xFFB0E57C)
+            : const Color(0xFFFF5E5E), // Change color if selected
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.all(10),
@@ -291,7 +326,8 @@ class _TableNumberPadState extends State<TableNumberPad> {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+            CrossAxisAlignment.center, // Center align the content
         children: [
           const Text(
             '--Assign Table Number--',
@@ -301,6 +337,7 @@ class _TableNumberPadState extends State<TableNumberPad> {
               fontSize: 14,
               letterSpacing: 0.14,
             ),
+            textAlign: TextAlign.center, // Center align the text
           ),
           const SizedBox(height: 10),
           Container(
@@ -316,6 +353,7 @@ class _TableNumberPadState extends State<TableNumberPad> {
                 fontSize: 14,
                 letterSpacing: 0.14,
               ),
+              textAlign: TextAlign.center, // Center align the text
             ),
           ),
           const SizedBox(height: 10),
