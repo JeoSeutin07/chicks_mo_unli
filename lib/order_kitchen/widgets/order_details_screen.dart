@@ -4,19 +4,24 @@ import 'menu_tabs_widget.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final Order order;
+  final VoidCallback onSendToKitchen;
 
-  const OrderDetailsScreen({super.key, required this.order});
+  const OrderDetailsScreen({
+    super.key,
+    required this.order,
+    required this.onSendToKitchen,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order Details'),
+        title: const Text('Order Details'),
       ),
       body: Container(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Color.fromRGBO(255, 248, 148, 0.98),
+          color: const Color.fromRGBO(255, 248, 148, 0.98),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -27,7 +32,7 @@ class OrderDetailsScreen extends StatelessWidget {
               children: [
                 Text(
                   'Order #${order.tableNumber}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
@@ -36,7 +41,7 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
                 Text(
                   'Table #${order.tableNumber}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
@@ -45,19 +50,19 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 7),
+            const SizedBox(height: 7),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '${order.timestamp}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Color.fromRGBO(121, 123, 126, 1),
                     fontFamily: 'Inter',
                   ),
                 ),
-                Text(
+                const Text(
                   '00:00',
                   style: TextStyle(
                     fontSize: 12,
@@ -68,20 +73,20 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 7),
+            const SizedBox(height: 7),
             Text(
               order.orderType,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 color: Color.fromRGBO(121, 123, 126, 1),
                 fontFamily: 'Inter',
               ),
             ),
-            SizedBox(height: 7),
+            const SizedBox(height: 7),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Item',
                   style: TextStyle(
                     fontSize: 12,
@@ -90,7 +95,7 @@ class OrderDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 Row(
-                  children: [
+                  children: const [
                     Text(
                       'Qty.',
                       style: TextStyle(
@@ -112,7 +117,7 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            Divider(
+            const Divider(
               color: Colors.black,
               height: 14,
             ),
@@ -123,14 +128,14 @@ class OrderDetailsScreen extends StatelessWidget {
                       price: item.price.toString(),
                     ))
                 .toList(),
-            Divider(
+            const Divider(
               color: Colors.black,
               height: 14,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'TOTAL',
                   style: TextStyle(
                     fontSize: 12,
@@ -140,9 +145,9 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
                 Text(
                   order.items
-                      .fold(0, (sum, item) => sum + item.price)
+                      .fold(0, (sum, item) => sum + int.parse(item.price))
                       .toString(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Colors.black,
                     fontFamily: 'Inter',
@@ -150,11 +155,11 @@ class OrderDetailsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 7),
+            const SizedBox(height: 7),
             Center(
               child: ElevatedButton(
-                onPressed: () {},
-                child: Text(
+                onPressed: onSendToKitchen,
+                child: const Text(
                   'Send to Kitchen',
                   style: TextStyle(
                     fontSize: 12,
@@ -163,12 +168,12 @@ class OrderDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromRGBO(255, 239, 0, 1),
-                  minimumSize: Size(154, 21),
+                  backgroundColor: const Color.fromRGBO(255, 239, 0, 1),
+                  minimumSize: const Size(154, 21),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 3),
+                  padding: const EdgeInsets.symmetric(vertical: 3),
                 ),
               ),
             ),
@@ -185,11 +190,11 @@ class OrderItem extends StatelessWidget {
   final String price;
 
   const OrderItem({
-    Key? key,
+    super.key,
     required this.itemName,
     required this.quantity,
     required this.price,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +203,7 @@ class OrderItem extends StatelessWidget {
       children: [
         Text(
           itemName,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             color: Colors.black,
             fontFamily: 'Inter',
@@ -208,16 +213,16 @@ class OrderItem extends StatelessWidget {
           children: [
             Text(
               quantity,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.black,
                 fontFamily: 'Inter',
               ),
             ),
-            SizedBox(width: 29),
+            const SizedBox(width: 29),
             Text(
               price,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.black,
                 fontFamily: 'Inter',

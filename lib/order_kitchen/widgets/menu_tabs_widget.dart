@@ -11,6 +11,7 @@ class MenuTabsWidget extends StatefulWidget {
 
 class _MenuTabsWidgetState extends State<MenuTabsWidget> {
   List<Order> orders = [];
+  List<Order> queueOrders = [];
   int currentTableNumber = 1;
 
   void addOrder(int tableNumber, String orderType) {
@@ -24,6 +25,13 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
     });
   }
 
+  void sendToKitchen(Order order) {
+    setState(() {
+      orders.remove(order);
+      queueOrders.add(order);
+    });
+  }
+
   void showOrderDetailsDialog(Order order) {
     showDialog(
       context: context,
@@ -31,7 +39,13 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        child: OrderDetailsScreen(order: order),
+        child: OrderDetailsScreen(
+          order: order,
+          onSendToKitchen: () {
+            sendToKitchen(order);
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
@@ -67,7 +81,7 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
           );
         },
       ),
-      const Center(child: Text('Queue Content')),
+      QueueTabContent(orders: queueOrders),
       const Center(child: Text('Served Content')),
     ];
   }
@@ -323,14 +337,21 @@ class MenuItem {
   final String title;
   final String price;
   final List<String> flavors;
+  final int quantity;
 
-  MenuItem({required this.title, required this.price, this.flavors = const []});
+  MenuItem({
+    required this.title,
+    required this.price,
+    this.flavors = const [],
+    this.quantity = 1,
+  });
 
-  MenuItem copyWith({List<String>? flavors}) {
+  MenuItem copyWith({List<String>? flavors, int? quantity}) {
     return MenuItem(
       title: title,
       price: price,
       flavors: flavors ?? this.flavors,
+      quantity: quantity ?? this.quantity,
     );
   }
 }
@@ -581,6 +602,29 @@ class FlavorButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class QueueTabContent extends StatelessWidget {
+  final List<Order> orders;
+
+  const QueueTabContent({super.key, required this.orders});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(5),
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        return ListTile(
+          title: Text('Table #${order.tableNumber} - ${order.orderType}'),
+          subtitle: Text('Items: ${order.items.length}'),
+          trailing: Text(
+              'Total: ${order.items.fold(0, (sum, item) => sum + int.parse(item.price))}'),
+        );
+      },
     );
   }
 }

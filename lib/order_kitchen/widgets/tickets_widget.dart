@@ -39,7 +39,10 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => OrderDetailsScreen(order: order),
+        builder: (context) => OrderDetailsScreen(
+          order: order,
+          onSendToKitchen: () {},
+        ),
       ),
     );
   }
