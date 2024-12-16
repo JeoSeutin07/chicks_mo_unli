@@ -1,3 +1,4 @@
+import 'package:chicks_mo_unli/pages/employee_id_screen.dart';
 import 'package:chicks_mo_unli/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -102,6 +103,7 @@ class ClockStatusWidget extends StatefulWidget {
 class _ClockStatusWidgetState extends State<ClockStatusWidget> {
   bool _isClockedIn = false;
   bool _isLoading = true;
+  bool isLoggingOut = false;
 
   @override
   void initState() {
@@ -148,10 +150,12 @@ class _ClockStatusWidgetState extends State<ClockStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const CircularProgressIndicator();
+    if (isLoggingOut) {
+      // If logging out, do not rebuild the widget (return an empty container or static widget)
+      return Container(); // Or any placeholder widget
     }
 
+    // If not logging out, proceed with building the clock in/out button
     return Container(
       width: 217,
       child: Column(
@@ -205,14 +209,14 @@ class LogoutButton extends StatelessWidget {
     await storage.delete(key: 'employeeID');
     await storage.delete(key: 'username');
 
-    // Clear the credentials in AuthProvider
+    // Clear credentials in AuthProvider
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     authProvider.clearCredentials();
 
-    // Navigate to the AuthPage after logout
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => AuthPage()),
+    // Navigate to EmployeeIdScreen and clear the navigation stack
+    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const EmployeeIdScreen()),
+      (Route<dynamic> route) => false, // Clears all previous routes
     );
   }
 

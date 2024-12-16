@@ -1,4 +1,5 @@
 import 'package:chicks_mo_unli/pages/auth_page.dart';
+import 'package:chicks_mo_unli/pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'widgets/pin_input.dart';
@@ -107,7 +108,13 @@ class ClockInScreenState extends State<ClockInScreen> {
           }
 
           // Navigate back to the previous screen
-          Navigator.of(context).pop();
+          if (mounted) {
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => MainPage()),
+              );
+            }
+          }
         } else {
           _showDialog(context, 'Error', 'User data is null');
         }

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthProvider with ChangeNotifier {
   // Main user fields
+  bool get isLoggedIn => _employeeId != null;
   String _employeeId = '';
   String _name = '';
   String _userType = '';
