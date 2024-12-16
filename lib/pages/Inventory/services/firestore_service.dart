@@ -9,7 +9,7 @@ class FirestoreService {
     try {
       final snapshot = await _firestore.collection('inventory/items/non-perishables').get();
       
-      print("Non-Perishable snapshot: ${snapshot.docs.map((doc) => doc.data()).toList()}");
+      print("Non-Perishable Items Fetched");
 
       return snapshot.docs.map((doc) => InventoryItemModel.fromFirestore(doc.data())).toList();
     } catch (e) {
@@ -23,7 +23,7 @@ class FirestoreService {
     try {
       final snapshot = await _firestore.collection('inventory/items/perishables').get();
       
-      print("Perishable snapshot: ${snapshot.docs.map((doc) => doc.data()).toList()}");
+      print("Perishable Items Fetched");
 
       return snapshot.docs.map((doc) => InventoryItemModel.fromFirestore(doc.data())).toList();
     } catch (e) {

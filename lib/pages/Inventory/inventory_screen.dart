@@ -34,7 +34,7 @@ class _InventoryTrackerState extends State<InventoryTracker> {
           ? await firestoreService.fetchPerishableItems()
           : await firestoreService.fetchNonPerishableItems();
 
-      print('Fetched items: $fetchedItems'); // Log results
+      print('Fetched items'); // Log results
       setState(() {
         inventoryItems = fetchedItems;
       });

@@ -8,7 +8,7 @@ class StockLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('StockLegend received items: $items'); // Debug
+    print('StockLegend Items Recieved'); // Debug
     
     // Dynamically determine stock states
     final highStock = items.where((item) => item.remainingStock > item.upStock).toList();
