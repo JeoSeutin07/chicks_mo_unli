@@ -5,6 +5,7 @@ import './models/inventory_item_model.dart';
 import './widgets/stock_legend.dart';
 import './models/inventory_audit_model.dart';
 
+
 class InventoryTracker extends StatefulWidget {
   @override
   _InventoryTrackerState createState() => _InventoryTrackerState();
@@ -87,6 +88,7 @@ class _InventoryTrackerState extends State<InventoryTracker> {
           ),
           Expanded(
             child: Container(
+
               color: Color(0xFFFFF894),
               padding: EdgeInsets.all(10),
               child: inventoryItems.isEmpty
