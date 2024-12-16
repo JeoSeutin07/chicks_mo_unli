@@ -1,4 +1,3 @@
-// File: lib/pages/inventory/model/inventory_item_model.dart
 import 'package:flutter/material.dart';
 
 class InventoryItemModel {

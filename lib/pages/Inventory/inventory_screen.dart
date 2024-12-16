@@ -3,6 +3,7 @@ import 'widgets/period_selector.dart';
 import './services/firestore_service.dart';
 import './models/inventory_item_model.dart';
 import './widgets/stock_legend.dart';
+import './models/inventory_audit_model.dart';
 
 class InventoryTracker extends StatefulWidget {
   @override
@@ -124,19 +125,26 @@ class _InventoryTrackerState extends State<InventoryTracker> {
                                 minHeight: 8,
                               ),
                               SizedBox(height: 8),
-                              Text('Stock Level: ${item.stockLevel}'),
-                              Text('Total Stock: ${item.totalStock}'),
-                              Text('Remaining Stock: ${item.remainingStock}'),
-                              Text('Restock Needed: ${item.restock}'),
+                              Text('Starting Stock: ${item.startingStock}kg'),
+                              Text('Restock: ${item.restock}kg'),
+                              Text('Total Stock: ${item.totalStock}kg'),
+                              Text('Remaining Stock: ${item.remainingStock}kg'),
                               SizedBox(height: 8),
                               ElevatedButton(
-                                onPressed: () {
-                                  // Adjust stock placeholder logic
-                                  print('Adjust Stock for ${item.name}');
-                                },
-                                child: Text('Adjust Stock'),
+                                onPressed: () => _showAuditModal(context),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFFFEF00),
+                                  backgroundColor: const Color(0xFF007BFF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Audit',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'Inter',
+                                  ),
                                 ),
                               ),
                             ],
@@ -219,5 +227,38 @@ Widget _buildInventoryItemCard(InventoryItemModel item) {
         ],
       ),
     ),
+  );
+}
+
+void _showAuditModal(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent closing the dialog by tapping outside
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        backgroundColor: Colors.transparent, // Makes it appear like an overlay
+        child: InventoryCard(
+          itemName: 'Sample Item', // Replace with dynamic values as needed
+          startingStock: 100.0,
+          restock: 50.0,
+          totalStock: 150.0,
+          remainingStock: 90.0,
+          onAddStock: () {
+            // Add your functionality here
+            Navigator.of(context).pop(); // Close the modal after action
+          },
+          onEndInventory: () {
+            // Add your functionality here
+            Navigator.of(context).pop(); // Close the modal after action
+          },
+          onCancel: () {
+            Navigator.of(context).pop(); // Close the modal without action
+          },
+        ),
+      );
+    },
   );
 }
