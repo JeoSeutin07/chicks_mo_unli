@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import './widgets/pin_input.dart';
-import 'main_page.dart'; // Add this import
+import 'main_page.dart';
+import 'employee_id_screen.dart'; // Add this import
+import '../providers/auth_provider.dart'; // Add this import
 
 class LoginScreen extends StatefulWidget {
   final String userName;
@@ -17,6 +20,21 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isDialogShowing = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkEmployeeID();
+  }
+
+  void _checkEmployeeID() {
+    if (widget.employeeId.isEmpty) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => EmployeeIdScreen()),
+      );
+    }
+  }
+
   Future<void> _login(String pin, BuildContext context) async {
     if (_isDialogShowing) return;
 
@@ -27,11 +45,17 @@ class _LoginScreenState extends State<LoginScreen> {
           .where('EmployeeID', isEqualTo: widget.employeeId)
           .where('pin', isEqualTo: parsedPin)
           .get();
+
       final List<DocumentSnapshot> documents = result.docs;
       if (documents.isNotEmpty) {
         final user = documents.first.data() as Map<String, dynamic>?;
+
         if (user != null) {
-          Navigator.push(
+          final authProvider =
+              Provider.of<AuthProvider>(context, listen: false);
+          await authProvider.setCredentials(widget.employeeId);
+
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => MainPage()),
           );

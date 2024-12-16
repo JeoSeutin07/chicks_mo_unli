@@ -7,8 +7,8 @@ class ProfileInfo extends StatelessWidget {
   final String phone;
   final String email;
   final String facebook;
+  final String profilePic;
 
-  // Constructor to accept these parameters
   const ProfileInfo({
     super.key,
     required this.username,
@@ -17,59 +17,79 @@ class ProfileInfo extends StatelessWidget {
     required this.phone,
     required this.email,
     required this.facebook,
+    required this.profilePic,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 380, // Set the width of the widget
-      //padding: EdgeInsets.all(10),
+      width: 500, // Set the width of the widget
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center, // Center the Row's children
-            children: [
-              Icon(
-                Icons.account_circle,
-                size: 147,
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                // Make the Column fill the remaining space
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Center the Row's children
                   children: [
-                    Text(
-                      username,
-                      style: TextStyle(
-                        fontFamily: 'Quicksand',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.24,
+                    // If profilePic is available, show it, else use default icon
+                    Container(
+                      child: CircleAvatar(
+                        radius: 74, // Adjust size to fit your design
+                        backgroundImage: profilePic.isNotEmpty
+                            ? NetworkImage(profilePic)
+                            : null,
+                        child: profilePic.isEmpty
+                            ? Icon(
+                                Icons.account_circle,
+                                size: 147,
+                              )
+                            : null,
                       ),
                     ),
-                    Text(
-                      id,
-                      style: TextStyle(
-                        fontFamily: 'Quicksand',
-                        fontSize: 16,
-                        letterSpacing: 0.16,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      type,
-                      style: TextStyle(
-                        fontFamily: 'Quicksand',
-                        fontSize: 16,
-                        letterSpacing: 0.16,
+                    SizedBox(width: 10),
+                    Expanded(
+                      // Make the Column fill the remaining space
+                      child: Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              username,
+                              style: TextStyle(
+                                fontFamily: 'Quicksand',
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.24,
+                              ),
+                            ),
+                            Text(
+                              id,
+                              style: TextStyle(
+                                fontFamily: 'Quicksand',
+                                fontSize: 16,
+                                letterSpacing: 0.16,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              type,
+                              style: TextStyle(
+                                fontFamily: 'Quicksand',
+                                fontSize: 16,
+                                letterSpacing: 0.16,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(height: 24),
           Container(
@@ -105,7 +125,7 @@ class ProfileInfo extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'Facebook:',
+                  'Facebook: $facebook',
                   style: TextStyle(
                     fontFamily: 'Quicksand',
                     fontSize: 16,
@@ -113,14 +133,6 @@ class ProfileInfo extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8),
-                Text(
-                  facebook,
-                  style: TextStyle(
-                    fontFamily: 'Quicksand',
-                    fontSize: 16,
-                    letterSpacing: 0.16,
-                  ),
-                ),
               ],
             ),
           ),

@@ -7,31 +7,9 @@ import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
 import 'Owner/owner_page.dart';
 import 'Cash_Flow/Cash_Flow.dart';
 import 'profile_page.dart';
-import '../widgets/profile_header.dart';
-
-class PageTitle extends StatelessWidget {
-  final String title;
-
-  const PageTitle({required this.title, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          // Remove border for debugging
-          ),
-      padding: const EdgeInsets.symmetric(
-          horizontal: 16.0, vertical: 8.0), // Adjust padding
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14, // Set the font size to 14px
-          fontWeight: FontWeight.normal, // Remove bold font weight
-        ),
-      ),
-    );
-  }
-}
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'auth_page.dart'; // Import AuthPage for navigation
+import '../widgets/header.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -42,6 +20,24 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _activeIndex = 4;
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkEmployeeID();
+  }
+
+  Future<void> _checkEmployeeID() async {
+    String? employeeID = await _storage.read(key: 'employeeID');
+    if (employeeID == null) {
+      // If employeeID is not stored, navigate to AuthPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AuthPage()),
+      );
+    }
+  }
 
   void _onNavItemTapped(int index) {
     setState(() {
@@ -86,39 +82,35 @@ class _MainPageState extends State<MainPage> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 35,
+        centerTitle: true,
+        backgroundColor: const Color(0xFFFFF3CB),
+        title: Text(
+          _getPageTitle(_activeIndex),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+          ),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
-          // Remove border for debugging
           borderRadius: BorderRadius.circular(28),
           color: const Color(0xFFFFF3CB),
         ),
         child: Column(
           children: [
             Container(
-              decoration: BoxDecoration(
-                  // Remove border for debugging
-                  ),
               child: ProfileHeader(userName: authProvider.name),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                  // Remove border for debugging
-                  ),
-              child: PageTitle(title: _getPageTitle(_activeIndex)),
             ),
             Expanded(
               child: Container(
-                decoration: BoxDecoration(
-                  // Remove border for debugging
-                  color: const Color(0xFFFFF3CB),
-                ),
+                color: const Color(0xFFFFF3CB),
                 child: _getPage(_activeIndex),
               ),
             ),
             Container(
-              decoration: BoxDecoration(
-                  // Remove border for debugging
-                  ),
               child: custom.NavigationBar(
                 activeIndex: _activeIndex,
                 onNavItemTapped: _onNavItemTapped,
