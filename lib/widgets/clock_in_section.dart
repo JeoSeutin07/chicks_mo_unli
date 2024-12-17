@@ -41,8 +41,7 @@ class _SetupAccountButtonState extends State<SetupAccountButton> {
   Color _buttonColor = const Color(0xFFFFF3CB);
 
   void _setupAccount() {
-    Navigator.push(
-      context,
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => SetupAccountScreen(),
       ),
@@ -122,25 +121,27 @@ class _ClockStatusWidgetState extends State<ClockStatusWidget> {
   }
 
   Future<void> _clockIn() async {
-    Navigator.push(
-      context,
+    Navigator.of(context, rootNavigator: true)
+        .pushReplacement(
       MaterialPageRoute(
         builder: (context) =>
             ClockInScreen(employeeId: widget.employeeId, isClockingIn: true),
       ),
-    ).then((_) {
+    )
+        .then((_) {
       _fetchClockStatus(); // Refresh clock status after returning from ClockInScreen
     });
   }
 
   Future<void> _clockOut() async {
-    Navigator.push(
-      context,
+    Navigator.of(context, rootNavigator: true)
+        .pushReplacement(
       MaterialPageRoute(
         builder: (context) =>
             ClockInScreen(employeeId: widget.employeeId, isClockingIn: false),
       ),
-    ).then((_) {
+    )
+        .then((_) {
       _fetchClockStatus(); // Refresh clock status after returning from ClockInScreen
     });
   }

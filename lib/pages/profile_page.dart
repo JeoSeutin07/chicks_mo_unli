@@ -13,15 +13,16 @@ class ProfilePage extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Navigator(
-        onGenerateRoute: (RouteSettings settings) {
-          return MaterialPageRoute(
-            builder: (context) => ProfileContent(authProvider: authProvider),
-          );
-        },
-      ),
-    );
+        backgroundColor: Colors.transparent,
+        body: Navigator(
+          key: GlobalKey<
+              NavigatorState>(), // Add a unique key for nested navigator
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute(
+              builder: (context) => ProfileContent(authProvider: authProvider),
+            );
+          },
+        ));
   }
 }
 
