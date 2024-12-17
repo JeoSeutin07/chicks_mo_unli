@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'widgets/period_selector.dart';
-import 'perishable_items.dart';
-import 'non_perishable_items.dart';
+import './services/firestore_service.dart';
+import './models/inventory_item_model.dart';
+import './widgets/stock_legend.dart';
+import './models/inventory_audit_model.dart';
+
 
 class InventoryTracker extends StatefulWidget {
   @override
@@ -10,28 +13,74 @@ class InventoryTracker extends StatefulWidget {
 
 class _InventoryTrackerState extends State<InventoryTracker> {
   bool isPerishableSelected = true;
+  final FirestoreService firestoreService = FirestoreService();
+  List<InventoryItemModel> inventoryItems = [];
+  bool isLoading = false; // To manage fetch loading status
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInventory();
+  }
+
+  /// Fetch inventory data safely
+  Future<void> _fetchInventory() async {
+    setState(() {
+      isLoading = true; // Show loader
+    });
+
+    try {
+      List<InventoryItemModel> fetchedItems = isPerishableSelected
+          ? await firestoreService.fetchPerishableItems()
+          : await firestoreService.fetchNonPerishableItems();
+
+      print('Fetched items'); // Log results
+      setState(() {
+        inventoryItems = fetchedItems;
+      });
+    } catch (e) {
+      print('Error fetching inventory: $e');
+    } finally {
+      setState(() {
+        isLoading = false; // Always reset loading state
+      });
+    }
+  }
+
+  /// Handle tab switching safely
+  void _onTabSelection(bool isPerishable) {
+    if (isPerishable == isPerishableSelected) return; // Prevent redundant fetch
+    setState(() {
+      isPerishableSelected = isPerishable;
+    });
+    _fetchInventory();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin:
-          EdgeInsets.symmetric(horizontal: 10), // Add left and right margins
+      margin: EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
           PeriodSelector(),
-          StockLegend(),
+          StockLegend(
+              items: inventoryItems), // Pass dynamic inventory items safely
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  _buildTab('Perishable', isPerishableSelected, () {
-                    setState(() => isPerishableSelected = true);
-                  }),
+                  _buildTab(
+                    'Perishable',
+                    isPerishableSelected,
+                    () => _onTabSelection(true),
+                  ),
                   SizedBox(width: 8),
-                  _buildTab('Non-Perishable', !isPerishableSelected, () {
-                    setState(() => isPerishableSelected = false);
-                  }),
+                  _buildTab(
+                    'Non-Perishable',
+                    !isPerishableSelected,
+                    () => _onTabSelection(false),
+                  ),
                 ],
               ),
               _buildSortButton(),
@@ -39,13 +88,72 @@ class _InventoryTrackerState extends State<InventoryTracker> {
           ),
           Expanded(
             child: Container(
-              color: Color(0xFFFFF894), // Set the background color
-              padding: EdgeInsets.all(10), // Set the inside padding
-              child: ListView(
-                children: isPerishableSelected
-                    ? buildPerishableItems()
-                    : buildNonPerishableItems(),
-              ),
+
+              color: Color(0xFFFFF894),
+              padding: EdgeInsets.all(10),
+              child: inventoryItems.isEmpty
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: inventoryItems.length,
+                      itemBuilder: (context, index) {
+                        final item = inventoryItems[index];
+                        return Container(
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFFFF3CB),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: item.stockColor,
+                              width: 3,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              LinearProgressIndicator(
+                                value: item.stockPercentage,
+                                backgroundColor: Colors.grey[300],
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    item.stockColor),
+                                minHeight: 8,
+                              ),
+                              SizedBox(height: 8),
+                              Text('Starting Stock: ${item.startingStock}kg'),
+                              Text('Restock: ${item.restock}kg'),
+                              Text('Total Stock: ${item.totalStock}kg'),
+                              Text('Remaining Stock: ${item.remainingStock}kg'),
+                              SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () => _showAuditModal(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF007BFF),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Audit',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
             ),
           ),
           ElevatedButton(
@@ -64,76 +172,95 @@ class _InventoryTrackerState extends State<InventoryTracker> {
       ),
     );
   }
-
-  Widget _buildTab(String text, bool isSelected, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFFFFF894) : Color(0xFFFFF55E),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(8),
-            topRight: Radius.circular(8),
-          ),
-        ),
-        child: Text(text),
-      ),
-    );
-  }
-
-  Widget _buildSortButton() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Color(0xFFFFF3CB)),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.sort, size: 16),
-          SizedBox(width: 8),
-          Text('Sort'),
-          Icon(Icons.arrow_drop_down, size: 16),
-        ],
-      ),
-    );
-  }
 }
 
-class StockLegend extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+/// Create tab UI
+Widget _buildTab(String text, bool isSelected, VoidCallback onTap) {
+  return InkWell(
+    onTap: onTap,
+    child: Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? Color(0xFFFFF894) : Color(0xFFFFF55E),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
+      ),
+      child: Text(text),
+    ),
+  );
+}
+
+/// Create sort button UI
+Widget _buildSortButton() {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      border: Border.all(color: Color(0xFFFFF3CB)),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: Row(
+      children: [
+        Icon(Icons.sort, size: 16),
+        SizedBox(width: 8),
+        Text('Sort'),
+        Icon(Icons.arrow_drop_down, size: 16),
+      ],
+    ),
+  );
+}
+
+/// Dynamically create inventory item cards
+Widget _buildInventoryItemCard(InventoryItemModel item) {
+  return Card(
+    elevation: 2,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: ListTile(
+      title: Text(item.name),
+      subtitle: Text('Stock Level: ${item.stockLevel}'),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildLegendItem('High Stock', Color(0xFFA1D8A6)),
-          _buildLegendItem('Moderate Stock', Color(0xFFFFA500)),
-          _buildLegendItem('Low Stock', Color(0xFFE74C3C)),
+          Text('Remaining: ${item.remainingStock}'),
+          Text('Restock: ${item.restock}'),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildLegendItem(String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+void _showAuditModal(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent closing the dialog by tapping outside
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(fontSize: 11),
+        backgroundColor: Colors.transparent, // Makes it appear like an overlay
+        child: InventoryCard(
+          itemName: 'Sample Item', // Replace with dynamic values as needed
+          startingStock: 100.0,
+          restock: 50.0,
+          totalStock: 150.0,
+          remainingStock: 90.0,
+          onAddStock: () {
+            // Add your functionality here
+            Navigator.of(context).pop(); // Close the modal after action
+          },
+          onEndInventory: () {
+            // Add your functionality here
+            Navigator.of(context).pop(); // Close the modal after action
+          },
+          onCancel: () {
+            Navigator.of(context).pop(); // Close the modal without action
+          },
         ),
-      ],
-    );
-  }
+      );
+    },
+  );
 }

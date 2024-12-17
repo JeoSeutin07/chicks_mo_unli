@@ -2,115 +2,139 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthProvider with ChangeNotifier {
-  String _username = 'Juan Dela Cruz';
-  String _token = '';
-  String _employeeId = 'Emp001';
-  String _pin = '111111';
-  String _name = 'De Leon';
-  String _userType = 'Owner';
-  String _facebook = 'Facebook.com  ';
-  String _email = 'Gmail.com';
-  String _phoneNumber = '09123456789';
+  // Main user fields
+  String _employeeId = '';
+  String _name = '';
+  String _userType = '';
+  String _facebook = '';
+  String _email = '';
+  String _phoneNumber = '';
+  String _profilePic = '';
+  String _lastLogin = '';
+
+  // Permissions
   bool _order = false;
   bool _stock = false;
   bool _cashflow = false;
   bool _admin = false;
 
-  String get username => _username;
-  String get token => _token;
+  // Activity logs
+  List<Map<String, dynamic>> _activityLogs = [];
+
+  // Getters
   String get employeeId => _employeeId;
-  String get pin => _pin;
   String get name => _name;
   String get userType => _userType;
   String get facebook => _facebook;
   String get email => _email;
   String get phoneNumber => _phoneNumber;
+  String get profilePic => _profilePic;
+  String get lastLogin => _lastLogin;
+
   bool get order => _order;
   bool get stock => _stock;
   bool get cashflow => _cashflow;
   bool get admin => _admin;
 
-  Future<void> setCredentials(String employeeId, String pin) async {
+  List<Map<String, dynamic>> get activityLogs => _activityLogs;
+
+  // Fetch user credentials
+
+  Future<void> setCredentials(String employeeId) async {
     try {
       // Fetch the user document matching EmployeeID and pin
       final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('users')
           .where('EmployeeID', isEqualTo: employeeId)
-          .where('pin',
-              isEqualTo: int.parse(pin)) // Ensure pin matches integer type
           .get();
 
       final List<DocumentSnapshot> documents = result.docs;
 
+      print("Documents found: ${documents.length}");
       if (documents.isNotEmpty) {
         final userDoc = documents.first;
-        final user = userDoc.data() as Map<String, dynamic>?;
+        final userData = userDoc.data() as Map<String, dynamic>?;
 
-        if (user != null) {
-          _employeeId = user['EmployeeID'] ?? '';
-          _pin = user['pin'] ?? '';
-          _name = user['name'] ?? 'Unknown';
-          _userType = user['userType'] ?? 'Unknown';
-          _username = user['name'] ?? '';
-          _token = user['token'] ?? '';
+        if (userData != null) {
+          print("Fetched user data: $userData");
 
-          // Fetch restriction subcollection documents
-          final restrictionSnapshot = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userDoc.id) // Use the user document ID
-              .collection('restriction')
-              .get();
+          // Update main user fields
+          _employeeId = userData['EmployeeID'] ?? '';
+          _name = userData['name'] ?? '';
+          _userType = userData['userType'] ?? '';
+          _facebook = userData['facebook'] ?? '';
+          _email = userData['email'] ?? '';
+          _phoneNumber = userData['phoneNumber'] ?? '';
+          _profilePic = userData['profilePic'] ?? '';
 
-          if (restrictionSnapshot.docs.isNotEmpty) {
-            // Use the first document in the restriction subcollection
-            final restrictionData = restrictionSnapshot.docs.first.data();
-            _order = restrictionData['order'] ?? false;
-            _stock = restrictionData['stock'] ?? false;
-            _cashflow = restrictionData['cashflow'] ?? false;
-            _admin = restrictionData['admin'] ?? false;
-          }
+          // Convert Firestore Timestamp to String if it exists
+          _lastLogin = _convertTimestampToString(userData['lastLogin']);
 
-          // Fetch user-info subcollection documents
-          final userInfoSnapshot = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userDoc.id) // Use the user document ID
-              .collection('user-info')
-              .get();
+          print(
+              "Updated user fields: $_employeeId, $_name, $_userType, $_facebook, $_email, $_phoneNumber, $_profilePic, $_lastLogin");
 
-          if (userInfoSnapshot.docs.isNotEmpty) {
-            // Use the first document in the user-info subcollection
-            final userInfoData = userInfoSnapshot.docs.first.data();
-            _facebook = userInfoData['facebook'] ?? '';
-            _email = userInfoData['email'] ?? '';
-            _phoneNumber = userInfoData['phone'] ?? '';
-          }
+          // Update permissions
+          final permissions =
+              userData['permissions'] as Map<String, dynamic>? ?? {};
+          _order = permissions['order'] ?? false;
+          _stock = permissions['stock'] ?? false;
+          _cashflow = permissions['cashflow'] ?? false;
+          _admin = permissions['admin'] ?? false;
 
-          notifyListeners(); // Notify listeners about updated values
+          print(
+              "Updated permissions: order=$_order, stock=$_stock, cashflow=$_cashflow, admin=$_admin");
+
+          // Update activity logs
+          final logs = userData['activityLogs'] as List<dynamic>? ?? [];
+          _activityLogs =
+              logs.map((log) => Map<String, dynamic>.from(log)).toList();
+
+          print("Updated activity logs: $_activityLogs");
+
+          // Notify listeners to update the UI
+          notifyListeners();
         } else {
           throw Exception('User data is null');
         }
       } else {
-        throw Exception('Invalid credentials');
+        throw Exception('No matching user found');
       }
     } catch (e) {
-      throw Exception('Error logging in: $e');
+      print("Error retrieving user data: $e");
+      throw Exception('Error retrieving user data: $e');
     }
   }
 
+// Helper function to convert Firestore Timestamp to String
+  String _convertTimestampToString(dynamic timestamp) {
+    if (timestamp is Timestamp) {
+      // Convert Timestamp to a DateTime object and format it to a String
+      DateTime dateTime = timestamp.toDate();
+      return dateTime
+          .toIso8601String(); // or any custom format like 'yyyy-MM-dd HH:mm:ss'
+    } else if (timestamp is String) {
+      return timestamp; // Already a String
+    }
+    return ''; // Return empty string if timestamp is null or in unexpected format
+  }
+
+  // Clear user credentials
   void clearCredentials() {
-    _username = '';
-    _token = '';
     _employeeId = '';
-    _pin = '';
     _name = '';
     _userType = '';
     _facebook = '';
     _email = '';
     _phoneNumber = '';
+    _profilePic = '';
+    _lastLogin = '';
+
     _order = false;
     _stock = false;
     _cashflow = false;
     _admin = false;
+
+    _activityLogs = [];
     notifyListeners();
   }
 }

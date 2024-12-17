@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'login_screen.dart';
 import '../widgets/styled_button.dart';
 
 class EmployeeIdScreen extends StatefulWidget {
-  const EmployeeIdScreen({super.key});
+  final String? storedEmployeeId;
+  final String? storedUserName;
+
+  const EmployeeIdScreen(
+      {super.key, this.storedEmployeeId, this.storedUserName});
 
   @override
   _EmployeeIdScreenState createState() => _EmployeeIdScreenState();
@@ -12,11 +17,39 @@ class EmployeeIdScreen extends StatefulWidget {
 
 class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
   final TextEditingController _controller = TextEditingController();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   bool _isFocused = false;
   bool _isDialogShowing = false;
+  bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.storedEmployeeId != null && widget.storedUserName != null) {
+      _controller.text = widget.storedEmployeeId!;
+      _navigateToLoginScreen(widget.storedEmployeeId!, widget.storedUserName!);
+    }
+  }
+
+  void _navigateToLoginScreen(String employeeId, String userName) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(
+          userName: userName,
+          employeeId: employeeId,
+        ),
+      ),
+    );
+  }
+
+  /// Validate the entered EmployeeID with Firestore
   Future<void> _checkEmployeeId(BuildContext context) async {
     if (_isDialogShowing) return;
+
+    setState(() {
+      _isLoading = true;
+    });
 
     final employeeId = _controller.text;
     try {
@@ -26,16 +59,14 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
           .get();
       final List<DocumentSnapshot> documents = result.docs;
       if (documents.isNotEmpty) {
-        // Employee ID found, proceed to login screen
+        // Employee ID found, store it and proceed to login screen
         final user = documents.first.data() as Map<String, dynamic>?;
         if (user != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  LoginScreen(userName: user['name'], employeeId: employeeId),
-            ),
-          );
+          // Save EmployeeID in secure storage
+          await _secureStorage.write(key: 'employeeID', value: employeeId);
+          await _secureStorage.write(key: 'username', value: user['firstName']);
+          // Navigate to LoginScreen
+          _navigateToLoginScreen(employeeId, user['firstName']);
         } else {
           _showDialog(context, 'Error', 'User data is null');
         }
@@ -45,9 +76,14 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
       }
     } catch (e) {
       _showDialog(context, 'Error', 'Error checking Employee ID: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
+  /// Show error or info dialog
   void _showDialog(BuildContext context, String title, String message) {
     if (_isDialogShowing) return;
 
@@ -140,12 +176,14 @@ class _EmployeeIdScreenState extends State<EmployeeIdScreen> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            StyledButton(
-                              text: 'Next',
-                              onPressed: () {
-                                _checkEmployeeId(context);
-                              },
-                            ),
+                            _isLoading
+                                ? const CircularProgressIndicator()
+                                : StyledButton(
+                                    text: 'Next',
+                                    onPressed: () {
+                                      _checkEmployeeId(context);
+                                    },
+                                  ),
                           ],
                         ),
                       ),
