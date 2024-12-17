@@ -20,6 +20,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     final bool isClockedIn = authProvider.clockedIn;
     final Color headerColor =
         isClockedIn ? const Color(0xFFFFEF00) : const Color(0xFFE74C3C);
+    final Color textColor = isClockedIn ? Colors.black : Colors.white;
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -36,8 +37,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             children: [
               Text(
                 widget.userName,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textColor,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.1,
@@ -45,8 +46,8 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               ),
               Text(
                 DateFormat('hh:mm a EEE MMM d').format(DateTime.now()),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textColor,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.1,

@@ -46,19 +46,63 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _getPage(int index) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    bool hasPermission = false;
+
     switch (index) {
       case 0:
-        return const OrdersKitchenScreen();
+        hasPermission = authProvider.order;
+        if (hasPermission) {
+          return const OrdersKitchenScreen();
+        }
+        break;
       case 1:
-        return InventoryTracker();
+        hasPermission = authProvider.stock;
+        if (hasPermission) {
+          return InventoryTracker();
+        }
+        break;
       case 2:
-        return DashboardScreen();
+        hasPermission = authProvider.cashflow;
+        if (hasPermission) {
+          return DashboardScreen();
+        }
+        break;
       case 3:
-        return OwnerDashboard();
+        hasPermission = authProvider.admin;
+        if (hasPermission) {
+          return OwnerDashboard();
+        }
+        break;
       case 4:
       default:
         return const ProfilePage();
     }
+
+    if (!hasPermission) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Access Denied'),
+              content: const Text(
+                  'You cannot access this page. Contact the Owner for more information.'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      });
+    }
+
+    return const ProfilePage();
   }
 
   String _getPageTitle(int index) {

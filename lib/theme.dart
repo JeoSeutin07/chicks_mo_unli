@@ -31,6 +31,10 @@ class AppTheme {
           ),
         ),
       ),
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+        primary: Color(0xFFFFF3CB),
+        secondary: Color(0xFFFFC107),
+      ),
     );
   }
 }
