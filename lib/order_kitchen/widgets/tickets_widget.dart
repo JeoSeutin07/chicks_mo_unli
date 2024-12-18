@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async'; // Add this import for Timer
 import 'menu_tabs_widget.dart';
 import 'order_details_screen.dart';
 
@@ -19,11 +20,15 @@ class Order {
 class TicketsWidget extends StatefulWidget {
   final List<Order> orders;
   final Function(int, String) onAddOrder;
+  final Function(int) onSelectTable;
+  final Function(Order) onSendToQueue;
 
   const TicketsWidget({
     super.key,
     required this.orders,
     required this.onAddOrder,
+    required this.onSelectTable,
+    required this.onSendToQueue,
   });
 
   @override
@@ -34,6 +39,26 @@ class _TicketsWidgetState extends State<TicketsWidget> {
   String selectedOrderType = 'Dine In';
   int currentTableNumber = 1;
   int? activeTableNumber;
+  Timer? _timer;
+  Map<Order, Stopwatch> orderTimers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {});
+    });
+  }
 
   void navigateToOrderDetails(Order order) {
     Navigator.push(
@@ -41,10 +66,25 @@ class _TicketsWidgetState extends State<TicketsWidget> {
       MaterialPageRoute(
         builder: (context) => OrderDetailsScreen(
           order: order,
-          onSendToKitchen: () {},
+          onSendToKitchen: () {
+            widget.onSendToQueue(order);
+            orderTimers[order] = Stopwatch()..start();
+            Navigator.pop(context);
+          },
         ),
       ),
     );
+  }
+
+  String _formatElapsedTime(Order order) {
+    final timer = orderTimers[order];
+    if (timer == null || !timer.isRunning) {
+      return '00:00';
+    }
+    final duration = timer.elapsed;
+    final minutes = duration.inMinutes;
+    final seconds = duration.inSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -59,13 +99,13 @@ class _TicketsWidgetState extends State<TicketsWidget> {
             child: Text(
               'On-Going Tickets',
               style: TextStyle(
-                fontSize: 18, // Slightly reduced font size for header
-                fontWeight: FontWeight.bold, // Bold font weight for header
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                 fontFamily: 'Roboto',
               ),
             ),
           ),
-          const SizedBox(height: 5), // Adjusted spacing
+          const SizedBox(height: 5),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -73,45 +113,46 @@ class _TicketsWidgetState extends State<TicketsWidget> {
               children: [
                 Container(
                   width: 72,
-                  margin: const EdgeInsets.symmetric(
-                      vertical: 5, horizontal: 5), // Adjusted horizontal margin
+                  height: 72,
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                   child: Material(
-                    color: const Color(
-                        0xFFE02C34), // Updated color to match branding
+                    color: const Color(0xFFE02C34),
                     borderRadius: BorderRadius.circular(8),
                     child: InkWell(
                       onTap: () => showOrderTypeDialog(context),
                       borderRadius: BorderRadius.circular(8),
-                      child: const Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Text(
-                          'Create Table',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontFamily: 'Inter',
-                            fontWeight:
-                                FontWeight.w600, // Slightly bolder font weight
+                      child: const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text(
+                            'Create Table',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 5), // Adjusted spacing between buttons
+                const SizedBox(width: 5),
                 ...widget.orders
                     .map((order) => GestureDetector(
                           onTap: () =>
                               switchTable(order.tableNumber, order.orderType),
                           child: Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 5), // Adjusted horizontal margin
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
                             child: OrderTicket(
                               order: order,
                               isSelected:
                                   activeTableNumber == order.tableNumber &&
                                       selectedOrderType == order.orderType,
                               onDetailsTap: () => navigateToOrderDetails(order),
+                              elapsedTime: _formatElapsedTime(order),
                             ),
                           ),
                         ))
@@ -128,7 +169,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFF3CB), // Set background color
+        backgroundColor: const Color(0xFFFFF3CB),
         title: const Text('Select Order Type'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -143,9 +184,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Dine In'
-                    ? const Color(0xFFFBD663) // Darker shade when selected
-                    : const Color(
-                        0xFFFFF894), // Lighter shade when not selected
+                    ? const Color(0xFFFBD663)
+                    : const Color(0xFFFFF894),
                 foregroundColor: Colors.black,
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
@@ -172,9 +212,8 @@ class _TicketsWidgetState extends State<TicketsWidget> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Takeout'
-                    ? const Color(0xFFFBD663) // Darker shade when selected
-                    : const Color(
-                        0xFFFFF894), // Lighter shade when not selected
+                    ? const Color(0xFFFBD663)
+                    : const Color(0xFFFFF894),
                 foregroundColor: Colors.black,
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(
@@ -199,7 +238,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFF3CB), // Set background color
+        backgroundColor: const Color(0xFFFFF3CB),
         content: TableNumberPad(
           onConfirm: (tableNumber) {
             if (tableNumber == 0) {
@@ -255,7 +294,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFF3CB), // Set background color
+        backgroundColor: const Color(0xFFFFF3CB),
         title: Text(
             'Order Summary for ${order.orderType == 'Takeout' ? 'Takeout #' : 'Table #'}${order.tableNumber}'),
         content: Column(
@@ -276,64 +315,72 @@ class _TicketsWidgetState extends State<TicketsWidget> {
       ),
     );
   }
+
+  void addOrder(int tableNumber, String orderType) {
+    setState(() {
+      if (!widget.orders.any((order) =>
+          order.tableNumber == tableNumber && order.orderType == orderType)) {
+        widget.orders.add(Order(
+          tableNumber: tableNumber,
+          items: [],
+          timestamp: DateTime.now(),
+          orderType: orderType,
+        ));
+      }
+    });
+  }
 }
 
 class OrderTicket extends StatelessWidget {
   final Order order;
   final bool isSelected;
   final VoidCallback onDetailsTap;
+  final String elapsedTime;
 
   const OrderTicket({
     super.key,
     required this.order,
     this.isSelected = false,
     required this.onDetailsTap,
+    required this.elapsedTime,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 72,
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      child: Material(
-        color: isSelected
-            ? const Color(0xFFE02C34)
-            : const Color(0xFFFF5E5E), // Change color if selected
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onDetailsTap,
+    return GestureDetector(
+      onTap: onDetailsTap,
+      child: Container(
+        width: 72,
+        height: 72,
+        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.center, // Center align the content
-              children: [
-                Text(
-                  order.orderType == 'Takeout'
-                      ? 'Takeout #${order.tableNumber}'
-                      : 'Table #${order.tableNumber}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                if (order.orderType == 'Dine In')
-                  Text(
-                    'Dine In',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-              ],
+          color: const Color.fromRGBO(251, 214, 99, 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              order.orderType == 'Takeout'
+                  ? 'Takeout #${order.tableNumber}'
+                  : 'Table #${order.tableNumber}',
+              style: const TextStyle(
+                fontSize: 11,
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
+            const SizedBox(height: 5),
+            Text(
+              elapsedTime,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -376,8 +423,7 @@ class _TableNumberPadState extends State<TableNumberPad> {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment:
-            CrossAxisAlignment.center, // Center align the content
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
             '--Assign Table Number--',
@@ -387,7 +433,7 @@ class _TableNumberPadState extends State<TableNumberPad> {
               fontSize: 14,
               letterSpacing: 0.14,
             ),
-            textAlign: TextAlign.center, // Center align the text
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 10),
           Container(
@@ -403,7 +449,7 @@ class _TableNumberPadState extends State<TableNumberPad> {
                 fontSize: 14,
                 letterSpacing: 0.14,
               ),
-              textAlign: TextAlign.center, // Center align the text
+              textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 10),

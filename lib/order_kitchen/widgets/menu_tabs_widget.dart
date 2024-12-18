@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'tickets_widget.dart';
 import 'order_details_screen.dart';
+import 'queue_tab_content.dart';
+import 'serve_tab_content.dart'; // Add this import
+import 'variation_selector.dart'; // Add this import
 
 class MenuTabsWidget extends StatefulWidget {
   const MenuTabsWidget({super.key});
@@ -9,45 +12,211 @@ class MenuTabsWidget extends StatefulWidget {
   _MenuTabsWidgetState createState() => _MenuTabsWidgetState();
 }
 
-class _MenuTabsWidgetState extends State<MenuTabsWidget> {
+class _MenuTabsWidgetState extends State<MenuTabsWidget>
+    with SingleTickerProviderStateMixin {
   List<Order> orders = [];
-  List<Order> queueOrders = [];
+  List<Order> kitchenOrders = [];
+  List<Order> servedOrders = [];
   int currentTableNumber = 1;
+  Order? currentOrder;
+  late TabController _tabController;
+  Map<Order, Stopwatch> orderTimers = {}; // Add this line
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    tabViews = [
+      MenuTabContent(
+        onItemSelected: (item) {
+          if (currentOrder == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please create a table first.'),
+              ),
+            );
+            return;
+          }
+          // Show flavor selection popup only for specific categories and items
+          if (item.title.contains('Unlimited') ||
+              item.title.contains('Wings') ||
+              item.title.contains('Drumettes')) {
+            showDialog(
+              context: context,
+              builder: (context) => FlavorSelectionScreen(
+                onConfirm: (selectedFlavors) {
+                  // Handle flavor selection
+                  setState(() {
+                    orders.last.items
+                        .add(item.copyWith(flavors: selectedFlavors));
+                  });
+                  Navigator.pop(context);
+                  // Show drink selection popup if the item contains drinks
+                  if (item.title.contains('drinks')) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => VariationSelector(
+                        onConfirm: (selectedVariation) {
+                          // Handle drink selection
+                          setState(() {
+                            orders.last.items.last = orders.last.items.last
+                                .copyWith(drinkType: selectedVariation);
+                          });
+                          Navigator.pop(context);
+                          showOrderDetailsModal(orders.last);
+                        },
+                      ),
+                    );
+                  } else {
+                    showOrderDetailsModal(orders.last);
+                  }
+                },
+              ),
+            );
+          } else if (item.title.contains('Drinks')) {
+            showDialog(
+              context: context,
+              builder: (context) => VariationSelector(
+                onConfirm: (selectedVariation) {
+                  // Handle drink selection
+                  setState(() {
+                    orders.last.items
+                        .add(item.copyWith(drinkType: selectedVariation));
+                  });
+                  Navigator.pop(context);
+                  showOrderDetailsModal(orders.last);
+                },
+              ),
+            );
+          } else {
+            setState(() {
+              orders.last.items.add(item);
+            });
+            showOrderDetailsModal(orders.last);
+          }
+        },
+      ),
+      QueueTabContent(
+        orders: kitchenOrders,
+        onServeOrder: serveOrder,
+        orderTimers: orderTimers, // Pass the order timers
+      ),
+      ServeTabContent(
+        orders: servedOrders,
+        onAddToOrder: addToOrder,
+        onCheckOut: checkOut,
+      ),
+    ];
+  }
 
   void addOrder(int tableNumber, String orderType) {
     setState(() {
-      orders.add(Order(
+      currentOrder = Order(
         tableNumber: tableNumber,
         items: [],
         timestamp: DateTime.now(),
         orderType: orderType,
-      ));
+      );
+      orders.add(currentOrder!);
     });
+    Navigator.pop(context); // Dismiss the numpad
+    showOrderDetailsModal(currentOrder!); // Show order details modal after creating an order
   }
 
   void sendToKitchen(Order order) {
     setState(() {
-      orders.remove(order);
-      queueOrders.add(order);
+      kitchenOrders.add(order);
+      currentOrder = null;
+      orderTimers[order] = Stopwatch()..start(); // Start the timer for the order
+    });
+    Navigator.pop(context); // Dismiss the modal
+    _tabController.animateTo(1); // Switch to the Queue tab
+  }
+
+  void serveOrder(Order order) {
+    setState(() {
+      kitchenOrders.remove(order);
+      servedOrders.add(order);
+      orderTimers[order]?.stop(); // Stop the timer when the order is served
+      _tabController.animateTo(2); // Switch to the Serve tab
     });
   }
 
-  void showOrderDetailsDialog(Order order) {
-    showDialog(
+  void addToOrder(Order order) {
+    setState(() {
+      currentOrder = order;
+    });
+    showOrderDetailsModal(order);
+  }
+
+  void checkOut(Order order) {
+    // Implement the logic to check out
+  }
+
+  void showOrderDetailsModal(Order order) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: OrderDetailsScreen(
-          order: order,
-          onSendToKitchen: () {
-            sendToKitchen(order);
-            Navigator.pop(context);
-          },
-        ),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => OrderDetailsScreen(
+        order: order,
+        onSendToKitchen: () {
+          sendToKitchen(order);
+        },
       ),
     );
+  }
+
+  void selectTable(int tableNumber) {
+    if (currentOrder != null && currentOrder!.tableNumber != tableNumber) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Change Table'),
+          content: Text(
+              'You have selected Table #$tableNumber. Do you want to switch to this table?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  currentTableNumber = tableNumber;
+                  currentOrder = orders.firstWhere(
+                      (order) => order.tableNumber == tableNumber,
+                      orElse: () => Order(
+                            tableNumber: tableNumber,
+                            items: [],
+                            timestamp: DateTime.now(),
+                            orderType: 'Dine in',
+                          ));
+                });
+                showOrderDetailsModal(currentOrder!);
+              },
+              child: const Text('Switch'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      setState(() {
+        currentTableNumber = tableNumber;
+        currentOrder =
+            orders.firstWhere((order) => order.tableNumber == tableNumber,
+                orElse: () => Order(
+                      tableNumber: tableNumber,
+                      items: [],
+                      timestamp: DateTime.now(),
+                      orderType: 'Dine in',
+                    ));
+      });
+      showOrderDetailsModal(currentOrder!);
+    }
   }
 
   List<Widget> tabs = const [
@@ -59,34 +228,6 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
   List<Widget> tabViews = [];
 
   @override
-  void initState() {
-    super.initState();
-    tabViews = [
-      MenuTabContent(
-        onItemSelected: (item) {
-          // Show flavor selection popup
-          showDialog(
-            context: context,
-            builder: (context) => FlavorSelectionScreen(
-              onConfirm: (selectedFlavors) {
-                // Handle flavor selection
-                setState(() {
-                  orders.last.items
-                      .add(item.copyWith(flavors: selectedFlavors));
-                });
-                Navigator.pop(context);
-                showOrderDetailsDialog(orders.last);
-              },
-            ),
-          );
-        },
-      ),
-      QueueTabContent(orders: queueOrders),
-      const Center(child: Text('Served Content')),
-    ];
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF3CB),
@@ -96,6 +237,8 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
             TicketsWidget(
               orders: orders,
               onAddOrder: addOrder,
+              onSelectTable: selectTable,
+              onSendToQueue: sendToKitchen, // Add this line
             ),
             const SizedBox(
                 height: 10), // Add spacing between TicketsWidget and tabs
@@ -105,6 +248,7 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
                 child: Column(
                   children: [
                     TabBar(
+                      controller: _tabController,
                       tabs: tabs,
                       labelColor: Colors.black,
                       unselectedLabelColor: Colors.black54,
@@ -123,6 +267,7 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
                         color: const Color(
                             0xFFFFF894), // Background color same as selected tab
                         child: TabBarView(
+                          controller: _tabController,
                           children: tabViews,
                         ),
                       ),
@@ -134,6 +279,13 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget> {
           ],
         ),
       ),
+      floatingActionButton: currentOrder != null
+          ? FloatingActionButton(
+              onPressed: () => showOrderDetailsModal(currentOrder!),
+              child: const Icon(Icons.receipt),
+              backgroundColor: Colors.yellow,
+            )
+          : null,
     );
   }
 }
@@ -338,20 +490,24 @@ class MenuItem {
   final String price;
   final List<String> flavors;
   final int quantity;
+  final String? drinkType; // Add this line
 
   MenuItem({
     required this.title,
     required this.price,
     this.flavors = const [],
     this.quantity = 1,
+    this.drinkType, // Add this line
   });
 
-  MenuItem copyWith({List<String>? flavors, int? quantity}) {
+  MenuItem copyWith({List<String>? flavors, int? quantity, String? drinkType}) {
+    // Modify this line
     return MenuItem(
       title: title,
       price: price,
       flavors: flavors ?? this.flavors,
       quantity: quantity ?? this.quantity,
+      drinkType: drinkType ?? this.drinkType, // Add this line
     );
   }
 }
@@ -395,13 +551,16 @@ class _FlavorSelectionScreenState extends State<FlavorSelectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              '--Flavors --',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Roboto',
-                letterSpacing: 0.14,
+            Center(
+              // Center the text
+              child: const Text(
+                'Flavors',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Roboto',
+                  letterSpacing: 0.14,
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -606,25 +765,14 @@ class FlavorButton extends StatelessWidget {
   }
 }
 
-class QueueTabContent extends StatelessWidget {
-  final List<Order> orders;
+class OrderItem {
+  final String name;
+  final int quantity;
+  final List<String> flavors; // Add this line
 
-  const QueueTabContent({super.key, required this.orders});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(5),
-      itemCount: orders.length,
-      itemBuilder: (context, index) {
-        final order = orders[index];
-        return ListTile(
-          title: Text('Table #${order.tableNumber} - ${order.orderType}'),
-          subtitle: Text('Items: ${order.items.length}'),
-          trailing: Text(
-              'Total: ${order.items.fold(0, (sum, item) => sum + int.parse(item.price))}'),
-        );
-      },
-    );
-  }
+  const OrderItem({
+    required this.name,
+    required this.quantity,
+    this.flavors = const [], // Add this line
+  });
 }
