@@ -102,7 +102,11 @@ class _MainPageState extends State<MainPage> {
         child: Column(
           children: [
             Container(
-              child: ProfileHeader(userName: authProvider.name),
+              child: ProfileHeader(
+                userName: authProvider.name,
+                //employeeId: authProvider.employeeId,
+                //clockedIn: authProvider.clockedIn,
+              ),
             ),
             Expanded(
               child: Container(

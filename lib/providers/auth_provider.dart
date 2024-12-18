@@ -17,6 +17,7 @@ class AuthProvider with ChangeNotifier {
   bool _stock = false;
   bool _cashflow = false;
   bool _admin = false;
+  bool _clockedIn = false;
 
   // Activity logs
   List<Map<String, dynamic>> _activityLogs = [];
@@ -35,6 +36,7 @@ class AuthProvider with ChangeNotifier {
   bool get stock => _stock;
   bool get cashflow => _cashflow;
   bool get admin => _admin;
+  bool get clockedIn => _clockedIn;
 
   List<Map<String, dynamic>> get activityLogs => _activityLogs;
 
@@ -80,7 +82,7 @@ class AuthProvider with ChangeNotifier {
           _stock = permissions['stock'] ?? false;
           _cashflow = permissions['cashflow'] ?? false;
           _admin = permissions['admin'] ?? false;
-
+          _clockedIn = userData['clockedIn'] ?? false;
           print(
               "Updated permissions: order=$_order, stock=$_stock, cashflow=$_cashflow, admin=$_admin");
 
@@ -133,6 +135,7 @@ class AuthProvider with ChangeNotifier {
     _stock = false;
     _cashflow = false;
     _admin = false;
+    _clockedIn = false;
 
     _activityLogs = [];
     notifyListeners();
