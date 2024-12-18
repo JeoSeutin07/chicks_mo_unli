@@ -71,7 +71,28 @@ class _TicketsWidgetState extends State<TicketsWidget> {
             orderTimers[order] = Stopwatch()..start();
             Navigator.pop(context);
           },
+          onRefill: () {
+            // Handle refill logic here
+            Navigator.pop(context);
+            showRefillDialog(order);
+          },
         ),
+      ),
+    );
+  }
+
+  void showRefillDialog(Order order) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Refill Order'),
+        content: const Text('Refill options will be implemented here.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
@@ -142,8 +163,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                 const SizedBox(width: 5),
                 ...widget.orders
                     .map((order) => GestureDetector(
-                          onTap: () =>
-                              switchTable(order.tableNumber, order.orderType),
+                          onTap: () => validateAndSwitchTable(order),
                           child: Container(
                             margin: const EdgeInsets.symmetric(horizontal: 5),
                             child: OrderTicket(
@@ -151,7 +171,6 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                               isSelected:
                                   activeTableNumber == order.tableNumber &&
                                       selectedOrderType == order.orderType,
-                              onDetailsTap: () => navigateToOrderDetails(order),
                               elapsedTime: _formatElapsedTime(order),
                             ),
                           ),
@@ -163,6 +182,24 @@ class _TicketsWidgetState extends State<TicketsWidget> {
         ],
       ),
     );
+  }
+
+  void switchTable(int tableNumber, String orderType) {
+    setState(() {
+      activeTableNumber = tableNumber;
+      selectedOrderType = orderType;
+    });
+    final selectedOrder = widget.orders.firstWhere(
+      (order) =>
+          order.tableNumber == tableNumber && order.orderType == orderType,
+      orElse: () => Order(
+        tableNumber: tableNumber,
+        items: [],
+        timestamp: DateTime.now(),
+        orderType: orderType,
+      ),
+    );
+    showOrderDetailsModal(selectedOrder);
   }
 
   void showOrderTypeDialog(BuildContext context) {
@@ -201,14 +238,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
                   selectedOrderType = 'Takeout';
                 });
                 Navigator.pop(context);
-                int takeoutNumber = widget.orders
-                        .where((order) => order.orderType == 'Takeout')
-                        .length +
-                    1;
-                widget.onAddOrder(takeoutNumber, 'Takeout');
-                setState(() {
-                  activeTableNumber = takeoutNumber;
-                });
+                showTakeoutNumberDialog(context);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: selectedOrderType == 'Takeout'
@@ -239,6 +269,7 @@ class _TicketsWidgetState extends State<TicketsWidget> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFFF3CB),
+        title: const Text('Assign Table Number'),
         content: TableNumberPad(
           onConfirm: (tableNumber) {
             if (tableNumber == 0) {
@@ -271,11 +302,84 @@ class _TicketsWidgetState extends State<TicketsWidget> {
     );
   }
 
-  void switchTable(int tableNumber, String orderType) {
-    setState(() {
-      activeTableNumber = tableNumber;
-      selectedOrderType = orderType;
-    });
+  void showTakeoutNumberDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFFFF3CB),
+        title: const Text('Assigning Take Out#'),
+        content: TakeoutNumberPad(
+          onConfirm: (takeoutNumber) {
+            setState(() {
+              activeTableNumber = takeoutNumber;
+            });
+            widget.onAddOrder(takeoutNumber, selectedOrderType);
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
+
+  void showOrderDetailsModal(Order order) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => OrderDetailsScreen(
+        order: order,
+        onSendToKitchen: () {
+          widget.onSendToQueue(order);
+          orderTimers[order] = Stopwatch()..start();
+          Navigator.pop(context);
+        },
+        onRefill: () {
+          // Handle refill logic here
+          Navigator.pop(context);
+          showRefillDialog(order);
+        },
+      ),
+    );
+  }
+
+  void validateAndSwitchTable(Order order) {
+    if (activeTableNumber != null &&
+        (activeTableNumber != order.tableNumber ||
+            selectedOrderType != order.orderType)) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Switch Table'),
+          content: Text(
+              'You are currently on ${selectedOrderType == 'Takeout' ? 'Takeout #' : 'Table #'}$activeTableNumber. Do you want to switch to ${order.orderType == 'Takeout' ? 'Takeout #' : 'Table #'}${order.tableNumber}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  activeTableNumber = order.tableNumber;
+                  selectedOrderType = order.orderType;
+                });
+                Navigator.pop(context);
+                showOrderDetailsModal(order);
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      setState(() {
+        activeTableNumber = order.tableNumber;
+        selectedOrderType = order.orderType;
+      });
+      showOrderDetailsModal(order);
+    }
   }
 
   void showOrderSummaryDialog(BuildContext context, Order order) {
@@ -334,54 +438,49 @@ class _TicketsWidgetState extends State<TicketsWidget> {
 class OrderTicket extends StatelessWidget {
   final Order order;
   final bool isSelected;
-  final VoidCallback onDetailsTap;
   final String elapsedTime;
 
   const OrderTicket({
     super.key,
     required this.order,
     this.isSelected = false,
-    required this.onDetailsTap,
     required this.elapsedTime,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onDetailsTap,
-      child: Container(
-        width: 72,
-        height: 72,
-        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: const Color.fromRGBO(251, 214, 99, 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              order.orderType == 'Takeout'
-                  ? 'Takeout #${order.tableNumber}'
-                  : 'Table #${order.tableNumber}',
-              style: const TextStyle(
-                fontSize: 11,
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
+    return Container(
+      width: 72,
+      height: 72,
+      margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: const Color.fromRGBO(251, 214, 99, 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            order.orderType == 'Takeout'
+                ? 'Takeout #${order.tableNumber}'
+                : 'Table #${order.tableNumber}',
+            style: const TextStyle(
+              fontSize: 11,
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 5),
-            Text(
-              elapsedTime,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 5),
+          Text(
+            elapsedTime,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -471,6 +570,158 @@ class _TableNumberPadState extends State<TableNumberPad> {
                         displayValue = displayValue.length > 1
                             ? displayValue.substring(0, displayValue.length - 1)
                             : '0';
+                      });
+                    },
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: const Color.fromRGBO(255, 243, 203, 1),
+                      ),
+                      child: const Icon(Icons.backspace, size: 24),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: _confirm,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: const Color.fromRGBO(255, 239, 0, 1),
+              ),
+              child: const Text(
+                'Confirm',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNumberRow(List<String> numbers) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: numbers.map((number) => _buildNumberButton(number)).toList(),
+    );
+  }
+
+  Widget _buildNumberButton(String number) {
+    return GestureDetector(
+      onTap: () => _updateDisplay(number),
+      child: Container(
+        width: 60,
+        height: 60,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: const Color.fromRGBO(255, 243, 203, 1),
+        ),
+        child: Text(
+          number,
+          style: const TextStyle(
+            fontSize: 14,
+            letterSpacing: 0.14,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TakeoutNumberPad extends StatefulWidget {
+  final Function(int) onConfirm;
+
+  const TakeoutNumberPad({super.key, required this.onConfirm});
+
+  @override
+  _TakeoutNumberPadState createState() => _TakeoutNumberPadState();
+}
+
+class _TakeoutNumberPadState extends State<TakeoutNumberPad> {
+  String displayValue = '1';
+
+  void _updateDisplay(String value) {
+    setState(() {
+      displayValue = value;
+    });
+  }
+
+  void _confirm() {
+    widget.onConfirm(int.parse(displayValue));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: const Color.fromRGBO(255, 243, 203, 1),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            '--Assign Take Out Number--',
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              letterSpacing: 0.14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: const Color.fromRGBO(255, 248, 148, 0.98),
+            ),
+            child: Text(
+              displayValue,
+              style: const TextStyle(
+                fontSize: 14,
+                letterSpacing: 0.14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Column(
+            children: [
+              _buildNumberRow(['1', '2', '3']),
+              const SizedBox(height: 10),
+              _buildNumberRow(['4', '5', '6']),
+              const SizedBox(height: 10),
+              _buildNumberRow(['7', '8', '9']),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildNumberButton('0'),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        displayValue = displayValue.length > 1
+                            ? displayValue.substring(0, displayValue.length - 1)
+                            : '1';
                       });
                     },
                     child: Container(

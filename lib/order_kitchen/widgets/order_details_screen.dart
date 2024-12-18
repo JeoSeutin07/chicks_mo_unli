@@ -6,11 +6,13 @@ import 'package:intl/intl.dart'; // Add this import for date formatting
 class OrderDetailsScreen extends StatelessWidget {
   final Order order;
   final VoidCallback onSendToKitchen;
+  final VoidCallback onRefill; // Add this line
 
   const OrderDetailsScreen({
     super.key,
     required this.order,
     required this.onSendToKitchen,
+    required this.onRefill, // Add this line
   });
 
   @override
@@ -180,9 +182,41 @@ class OrderDetailsScreen extends StatelessWidget {
           const SizedBox(height: 7),
           Center(
             child: ElevatedButton(
-              onPressed: onSendToKitchen,
+              onPressed: () {
+                if (order.items.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Cannot send an empty order to the kitchen.'),
+                    ),
+                  );
+                } else {
+                  onSendToKitchen();
+                }
+              },
               child: const Text(
                 'Send to Kitchen',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(255, 239, 0, 1),
+                minimumSize: const Size(154, 21),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 3),
+              ),
+            ),
+          ),
+          const SizedBox(height: 7),
+          Center(
+            child: ElevatedButton(
+              onPressed: onRefill,
+              child: const Text(
+                'Refill',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.black,

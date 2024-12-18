@@ -120,14 +120,16 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget>
       orders.add(currentOrder!);
     });
     Navigator.pop(context); // Dismiss the numpad
-    showOrderDetailsModal(currentOrder!); // Show order details modal after creating an order
+    showOrderDetailsModal(
+        currentOrder!); // Show order details modal after creating an order
   }
 
   void sendToKitchen(Order order) {
     setState(() {
       kitchenOrders.add(order);
       currentOrder = null;
-      orderTimers[order] = Stopwatch()..start(); // Start the timer for the order
+      orderTimers[order] = Stopwatch()
+        ..start(); // Start the timer for the order
     });
     Navigator.pop(context); // Dismiss the modal
     _tabController.animateTo(1); // Switch to the Queue tab
@@ -165,6 +167,7 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget>
         onSendToKitchen: () {
           sendToKitchen(order);
         },
+        onRefill: () {},
       ),
     );
   }

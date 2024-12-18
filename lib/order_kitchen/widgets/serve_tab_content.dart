@@ -1,5 +1,6 @@
 import 'package:chicks_mo_unli/order_kitchen/widgets/tickets_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Add this import for date formatting
 import 'order_details_screen.dart';
 
 class ServeTabContent extends StatelessWidget {
@@ -21,6 +22,8 @@ class ServeTabContent extends StatelessWidget {
       itemCount: orders.length,
       itemBuilder: (context, index) {
         final order = orders[index];
+        final DateFormat dateFormat = DateFormat('MM/dd/yyyy hh:mm a'); // Define date format
+        final String formattedDate = dateFormat.format(order.timestamp); // Format the timestamp
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 5),
           decoration: BoxDecoration(
@@ -30,9 +33,9 @@ class ServeTabContent extends StatelessWidget {
           ),
           child: OrderCard(
             orderNumber: order.tableNumber.toString(),
-            dateTime: order.timestamp.toString(),
+            dateTime: formattedDate, // Use formatted date
             tableNumber: order.tableNumber.toString(),
-            orderTime: order.timestamp.toString(),
+            orderTime: DateFormat('hh:mm a').format(order.timestamp), // Display time in 12-hour format
             items: order.items
                 .map((item) => OrderItem(
                       name: item.title,
@@ -41,7 +44,7 @@ class ServeTabContent extends StatelessWidget {
                 .toList(),
             onAddToOrder: () => onAddToOrder(order),
             onCheckOut: () => onCheckOut(order),
-            orderType: order.orderType, // Ensure this line is present
+            orderType: order.orderType, // Add this line
           ),
         );
       },
@@ -57,7 +60,7 @@ class OrderCard extends StatelessWidget {
   final List<OrderItem> items;
   final VoidCallback onAddToOrder;
   final VoidCallback onCheckOut;
-  final String orderType; // Ensure this line is present
+  final String orderType; // Add this line
 
   const OrderCard({
     Key? key,
@@ -68,7 +71,7 @@ class OrderCard extends StatelessWidget {
     required this.items,
     required this.onAddToOrder,
     required this.onCheckOut,
-    required this.orderType, // Ensure this line is present
+    required this.orderType, // Add this line
   }) : super(key: key);
 
   @override
@@ -127,7 +130,7 @@ class OrderCard extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           Text(
-            orderType, // Ensure this line is present
+            orderType, // Add this line
             style: const TextStyle(
               color: Color.fromRGBO(121, 123, 126, 1),
               fontSize: 14,
