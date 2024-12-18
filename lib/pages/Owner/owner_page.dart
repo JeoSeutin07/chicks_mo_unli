@@ -107,7 +107,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         );
         break;
       case 'Inventory':
-        targetPage = /*InventoryPage();*/ UploadMenuToFirestore();
+        targetPage = InventoryPage();
         break;
       case 'Products':
         targetPage = ProductPage();
