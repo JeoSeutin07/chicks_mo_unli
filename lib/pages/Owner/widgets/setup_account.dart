@@ -1,63 +1,38 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../../providers/auth_provider.dart';
+import '../../../providers/auth_provider.dart';
 
-class UpdateEmployee extends StatefulWidget {
-  final DocumentSnapshot employee;
-
-  UpdateEmployee({required this.employee}); // Ensure employee data is required
-
+class SetupAccountScreen extends StatefulWidget {
   @override
-  _UpdateEmployeeState createState() => _UpdateEmployeeState();
+  _SetupAccountScreenState createState() => _SetupAccountScreenState();
 }
 
-class _UpdateEmployeeState extends State<UpdateEmployee> {
+class _SetupAccountScreenState extends State<SetupAccountScreen> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _firstNameController;
-  late TextEditingController _lastNameController;
+  late TextEditingController _nameController;
   late TextEditingController _pinController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _facebookController;
-  late TextEditingController _userTypeController;
   bool _isChanged = false;
   bool _isPinVisible = false; // Added to track PIN visibility
-  Map<String, bool> _permissions = {
-    'admin': false,
-    'cashflow': false,
-    'order': false,
-    'stock': false,
-  };
 
   @override
   void initState() {
     super.initState();
-    _firstNameController = TextEditingController();
-    _lastNameController = TextEditingController();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _nameController = TextEditingController(text: authProvider.name);
     _pinController = TextEditingController();
-    _emailController = TextEditingController();
-    _phoneController = TextEditingController();
-    _facebookController = TextEditingController();
-    _userTypeController = TextEditingController();
+    _emailController = TextEditingController(text: authProvider.email);
+    _phoneController = TextEditingController(text: authProvider.phoneNumber);
+    _facebookController = TextEditingController(text: authProvider.facebook);
 
-    // Populate controllers with existing employee data
-    _firstNameController.text = widget.employee['firstName'];
-    _lastNameController.text = widget.employee['lastName'];
-    _pinController.text = widget.employee['pin'].toString();
-    _emailController.text = widget.employee['email'];
-    _phoneController.text = widget.employee['phoneNumber'];
-    _facebookController.text = widget.employee['facebook'];
-    _userTypeController.text = widget.employee['userType'];
-    _permissions = Map<String, bool>.from(widget.employee['permissions']);
-
-    _firstNameController.addListener(_onChanged);
-    _lastNameController.addListener(_onChanged);
+    _nameController.addListener(_onChanged);
     _pinController.addListener(_onChanged);
     _emailController.addListener(_onChanged);
     _phoneController.addListener(_onChanged);
     _facebookController.addListener(_onChanged);
-    _userTypeController.addListener(_onChanged);
   }
 
   void _onChanged() {
@@ -66,36 +41,114 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
     });
   }
 
-  Future<void> _updateEmployee() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _updateDetails() async {
+    if (!_isChanged) return; // Skip update if no changes
 
-    // Create a map to store the employee details
-    Map<String, dynamic> employeeData = {
-      'firstName': _firstNameController.text,
-      'lastName': _lastNameController.text,
-      'name': '${_firstNameController.text} ${_lastNameController.text}',
-      'pin': int.parse(_pinController.text), // Store pin as number
-      'clockInOutPin': int.parse(_pinController.text), // Store pin as number
-      'email': _emailController.text,
-      'phoneNumber': _phoneController.text,
-      'facebook': _facebookController.text,
-      'userType': _userTypeController.text,
-      'permissions': _permissions,
-    };
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final employeeId = authProvider.employeeId;
+
+    // Create a map to store only the changed fields
+    Map<String, dynamic> updates = {};
+
+    // Compare current values with initial ones and add changed fields to the map
+    if (_nameController.text != authProvider.name) {
+      updates['name'] = _nameController.text;
+    }
+    if (_pinController.text.isNotEmpty) {
+      // Ensure PIN is valid before adding it to updates
+      if (_pinController.text.length == 6 &&
+          RegExp(r'^\d{6}$').hasMatch(_pinController.text)) {
+        updates['pin'] = int.parse(_pinController.text);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid PIN format')),
+        );
+        return;
+      }
+    }
+    if (_emailController.text != authProvider.email) {
+      // Validate email before adding
+      if (RegExp(r'^[a-zA-Z0-9._%+-]+@example\.com$')
+          .hasMatch(_emailController.text)) {
+        updates['email'] = _emailController.text;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid email format')),
+        );
+        return;
+      }
+    }
+    if (_phoneController.text != authProvider.phoneNumber) {
+      // Validate phone number before adding
+      if (RegExp(r'^(09\d{9}|\+639\d{9})$').hasMatch(_phoneController.text)) {
+        updates['phoneNumber'] = _phoneController.text;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid phone number format')),
+        );
+        return;
+      }
+    }
+    if (_facebookController.text != authProvider.facebook) {
+      updates['facebook'] = _facebookController.text;
+    }
+
+    // If no fields were changed, skip the update
+    if (updates.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No changes to update')),
+      );
+      return;
+    }
 
     try {
-      // Update existing employee
+      // Update Firestore with only the changed fields
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.employee.id)
-          .update(employeeData);
+          .doc(employeeId)
+          .update(updates);
+
+      // Update the AuthProvider with new values
+      authProvider.setCredentials(employeeId);
+
+      setState(() {
+        _isChanged = false; // Reset change tracker
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Employee updated successfully')),
+        const SnackBar(content: Text('Details updated successfully')),
       );
-      Navigator.of(context).pushReplacementNamed('/home');
+
+      // Show success modal
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Employee Added Successfully'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Name: ${_nameController.text}'),
+                Text('Employee ID: $employeeId'),
+                Text('PIN: ${_pinController.text}'),
+                Text('Clock In/Out PIN: ${_pinController.text}'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating employee: $e')),
+        SnackBar(content: Text('Error updating details: $e')),
       );
     }
   }
@@ -119,44 +172,23 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 20), // Space for the AppBar
+                          const SizedBox(height: 60), // Space for the AppBar
                           TextFormField(
-                            controller: _firstNameController,
+                            controller: _nameController,
                             decoration: const InputDecoration(
-                              labelText: 'First Name*',
+                              labelText: 'Full Name *',
                               border: OutlineInputBorder(),
                               contentPadding:
                                   EdgeInsets.symmetric(horizontal: 20),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Please enter your first name';
+                                return 'Please enter your full name';
                               }
                               final alphanumericRegex =
                                   RegExp(r'^[a-zA-Z0-9. ]+$');
                               if (!alphanumericRegex.hasMatch(value)) {
-                                return 'First Name must be alphanumeric and can contain periods.';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 13),
-                          TextFormField(
-                            controller: _lastNameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Last Name *',
-                              border: OutlineInputBorder(),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 20),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your last name';
-                              }
-                              final alphanumericRegex =
-                                  RegExp(r'^[a-zA-Z0-9. ]+$');
-                              if (!alphanumericRegex.hasMatch(value)) {
-                                return 'Last Name must be alphanumeric and can contain periods.';
+                                return 'Full Name must be alphanumeric and can contain periods.';
                               }
                               return null;
                             },
@@ -166,7 +198,7 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
                             keyboardType: TextInputType.number,
                             controller: _pinController,
                             decoration: InputDecoration(
-                              labelText: 'Clock In/Out Pin *',
+                              labelText: 'Change Log In Pin *',
                               border: const OutlineInputBorder(),
                               contentPadding:
                                   const EdgeInsets.symmetric(horizontal: 20),
@@ -256,69 +288,8 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
                             ),
                           ),
                           const SizedBox(height: 13),
-                          TextFormField(
-                            controller: _userTypeController,
-                            decoration: const InputDecoration(
-                              labelText: 'Role',
-                              border: OutlineInputBorder(),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 20),
-                            ),
-                          ),
-                          const SizedBox(height: 13),
-                          const Text('Permissions'),
-                          SwitchListTile(
-                            title: const Text('Admin'),
-                            value: _permissions['admin']!,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _permissions['admin'] = value;
-                                _onChanged();
-                              });
-                            },
-                          ),
-                          SwitchListTile(
-                            title: const Text('Cashflow'),
-                            value: _permissions['cashflow']!,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _permissions['cashflow'] = value;
-                                _onChanged();
-                              });
-                            },
-                          ),
-                          SwitchListTile(
-                            title: const Text('Order'),
-                            value: _permissions['order']!,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _permissions['order'] = value;
-                                _onChanged();
-                              });
-                            },
-                          ),
-                          SwitchListTile(
-                            title: const Text('Stock'),
-                            value: _permissions['stock']!,
-                            onChanged: (bool value) {
-                              setState(() {
-                                _permissions['stock'] = value;
-                                _onChanged();
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 13),
                           ElevatedButton(
-                            onPressed: _isChanged
-                                ? () async {
-                                    if (_formKey.currentState!.validate()) {
-                                      setState(() {
-                                        _isChanged = false; // Disable button
-                                      });
-                                      await _updateEmployee();
-                                    }
-                                  }
-                                : null,
+                            onPressed: _isChanged ? _updateDetails : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFFFEF00),
                               minimumSize: const Size.fromHeight(50),
@@ -355,7 +326,7 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
               elevation: 0,
               centerTitle: true,
               title: const Text(
-                'Update Employee',
+                'Set Up Account',
                 style: TextStyle(color: Colors.black, fontSize: 12),
               ),
               toolbarHeight: 35, // Set the height to 35

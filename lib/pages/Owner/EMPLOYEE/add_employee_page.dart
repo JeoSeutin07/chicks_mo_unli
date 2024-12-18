@@ -1,18 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../../providers/auth_provider.dart';
+import '../../../providers/auth_provider.dart';
+import 'package:chicks_mo_unli/pages/Owner/EMPLOYEE/success_modal.dart';
 
-class UpdateEmployee extends StatefulWidget {
-  final DocumentSnapshot employee;
-
-  UpdateEmployee({required this.employee}); // Ensure employee data is required
-
+class AddNewEmployee extends StatefulWidget {
   @override
-  _UpdateEmployeeState createState() => _UpdateEmployeeState();
+  _AddNewEmployeeState createState() => _AddNewEmployeeState();
 }
 
-class _UpdateEmployeeState extends State<UpdateEmployee> {
+class _AddNewEmployeeState extends State<AddNewEmployee> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
@@ -41,16 +39,6 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
     _facebookController = TextEditingController();
     _userTypeController = TextEditingController();
 
-    // Populate controllers with existing employee data
-    _firstNameController.text = widget.employee['firstName'];
-    _lastNameController.text = widget.employee['lastName'];
-    _pinController.text = widget.employee['pin'].toString();
-    _emailController.text = widget.employee['email'];
-    _phoneController.text = widget.employee['phoneNumber'];
-    _facebookController.text = widget.employee['facebook'];
-    _userTypeController.text = widget.employee['userType'];
-    _permissions = Map<String, bool>.from(widget.employee['permissions']);
-
     _firstNameController.addListener(_onChanged);
     _lastNameController.addListener(_onChanged);
     _pinController.addListener(_onChanged);
@@ -60,42 +48,91 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
     _userTypeController.addListener(_onChanged);
   }
 
+  void _showEmployeeSuccessModal(
+      BuildContext context, Map<String, dynamic> employeeData) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EmployeeSuccessModal(employeeData: employeeData);
+      },
+    );
+  }
+
   void _onChanged() {
     setState(() {
       _isChanged = true;
     });
   }
 
-  Future<void> _updateEmployee() async {
+  Future<void> _addEmployee() async {
     if (!_formKey.currentState!.validate()) return;
+    String employeeId = 'EMP${DateTime.now().millisecondsSinceEpoch}';
 
-    // Create a map to store the employee details
-    Map<String, dynamic> employeeData = {
+    // Create a map to store the new employee details
+    Map<String, dynamic> newEmployee = {
+      'EmployeeID': employeeId,
+      'createdAt': Timestamp.now(),
       'firstName': _firstNameController.text,
       'lastName': _lastNameController.text,
       'name': '${_firstNameController.text} ${_lastNameController.text}',
       'pin': int.parse(_pinController.text), // Store pin as number
       'clockInOutPin': int.parse(_pinController.text), // Store pin as number
+      'profilePic': "",
+      'lastClockIn': Timestamp.now(),
+      'lastLogin': Timestamp.now(),
+      'clockedIn': false,
       'email': _emailController.text,
       'phoneNumber': _phoneController.text,
       'facebook': _facebookController.text,
       'userType': _userTypeController.text,
       'permissions': _permissions,
+      "activityLogs": [
+        {
+          "createdAt": Timestamp.now(),
+        }
+      ]
     };
 
     try {
-      // Update existing employee
+      // Set the new employee with the specific EmployeeID as document ID
+      DocumentReference userRef =
+          FirebaseFirestore.instance.collection('users').doc(employeeId);
+
+      await userRef.set(newEmployee);
+      // Show success modal
+      _showEmployeeSuccessModal(context, newEmployee);
+// Prepare initial attendance document under 'attendance' collection
+      Map<String, dynamic> attendance = {
+        'attendance':
+            [], // Optional: This can be an empty list or can be removed
+      };
+
+// Add an initial attendance record to the 'attendance' collection
       await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.employee.id)
-          .update(employeeData);
+          .collection('attendance')
+          .doc(employeeId)
+          .set(attendance);
+// Create a timestamp-based attendance document in the subcollection
+      Map<String, dynamic> clockInData = {
+        'clockInTime': Timestamp.now(), // Current timestamp for clock-in
+        'clockOutTime': null, // Null for initial clock-out
+        'status': 'clockedIn', // Initial status
+      };
+
+// Add the clock-in document to a subcollection named 'attendanceRecords'
+      await userRef
+          .collection('attendance') // Subcollection under user document
+          .doc(DateFormat('yyyyMMdd_HHmmss').format(
+              Timestamp.now().toDate())) // Use current time as document ID
+          .set(clockInData);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Employee updated successfully')),
+        const SnackBar(content: Text('Employee added successfully')),
       );
       Navigator.of(context).pushReplacementNamed('/home');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating employee: $e')),
+        SnackBar(content: Text('Error adding employee: $e')),
       );
     }
   }
@@ -315,7 +352,7 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
                                       setState(() {
                                         _isChanged = false; // Disable button
                                       });
-                                      await _updateEmployee();
+                                      await _addEmployee();
                                     }
                                   }
                                 : null,
@@ -329,7 +366,7 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
                               shadowColor: Colors.black.withOpacity(0.25),
                             ),
                             child: const Text(
-                              'Update',
+                              'Add',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -355,7 +392,7 @@ class _UpdateEmployeeState extends State<UpdateEmployee> {
               elevation: 0,
               centerTitle: true,
               title: const Text(
-                'Update Employee',
+                'Add New Employee',
                 style: TextStyle(color: Colors.black, fontSize: 12),
               ),
               toolbarHeight: 35, // Set the height to 35

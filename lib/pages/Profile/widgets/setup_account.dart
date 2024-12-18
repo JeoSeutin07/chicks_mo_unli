@@ -58,7 +58,7 @@ class _SetupAccountScreenState extends State<SetupAccountScreen> {
       // Ensure PIN is valid before adding it to updates
       if (_pinController.text.length == 6 &&
           RegExp(r'^\d{6}$').hasMatch(_pinController.text)) {
-        updates['pin'] = _pinController.text;
+        updates['pin'] = int.parse(_pinController.text);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Invalid PIN format')),

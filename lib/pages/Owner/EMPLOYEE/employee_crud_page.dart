@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:chicks_mo_unli/pages/Owner/EMPLOYEE/firebase_services.dart';
-import 'package:chicks_mo_unli/pages/Owner/EMPLOYEE/models/users.model.dart';
-import 'package:chicks_mo_unli/pages/Owner/EMPLOYEE/employee_card.dart';
+import 'firebase_services.dart';
+import 'models/users.model.dart';
+import 'employee_card.dart';
 import 'package:chicks_mo_unli/pages/Owner/EMPLOYEE/add_employee_page.dart';
 import 'package:chicks_mo_unli/pages/Owner/EMPLOYEE/update_employee.dart';
 

@@ -3,12 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/auth_provider.dart';
 
-class AddNewEmployee extends StatefulWidget {
+class UpdateEmployee extends StatefulWidget {
+  final DocumentSnapshot employee;
+
+  const UpdateEmployee(
+      {required this.employee}); // Ensure employee data is required
+
   @override
-  _AddNewEmployeeState createState() => _AddNewEmployeeState();
+  _UpdateEmployeeState createState() => _UpdateEmployeeState();
 }
 
-class _AddNewEmployeeState extends State<AddNewEmployee> {
+class _UpdateEmployeeState extends State<UpdateEmployee> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
@@ -37,6 +42,16 @@ class _AddNewEmployeeState extends State<AddNewEmployee> {
     _facebookController = TextEditingController();
     _userTypeController = TextEditingController();
 
+    // Populate controllers with existing employee data
+    _firstNameController.text = widget.employee['firstName'];
+    _lastNameController.text = widget.employee['lastName'];
+    _pinController.text = widget.employee['pin'].toInt();
+    _emailController.text = widget.employee['email'];
+    _phoneController.text = widget.employee['phoneNumber'];
+    _facebookController.text = widget.employee['facebook'];
+    _userTypeController.text = widget.employee['userType'];
+    _permissions = Map<String, bool>.from(widget.employee['permissions']);
+
     _firstNameController.addListener(_onChanged);
     _lastNameController.addListener(_onChanged);
     _pinController.addListener(_onChanged);
@@ -52,74 +67,36 @@ class _AddNewEmployeeState extends State<AddNewEmployee> {
     });
   }
 
-  Future<void> _addEmployee() async {
+  Future<void> _updateEmployee() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Create a map to store the new employee details
-    Map<String, dynamic> newEmployee = {
-      'EmployeeID': 'EMP${DateTime.now().millisecondsSinceEpoch}',
-      'createdAt': Timestamp.now(),
+    // Create a map to store the employee details
+    Map<String, dynamic> employeeData = {
       'firstName': _firstNameController.text,
       'lastName': _lastNameController.text,
       'name': '${_firstNameController.text} ${_lastNameController.text}',
       'pin': int.parse(_pinController.text), // Store pin as number
       'clockInOutPin': int.parse(_pinController.text), // Store pin as number
-      'profilePic': "",
-      'lastClockIn': Timestamp.now(),
-      'lastLogin': Timestamp.now(),
-      'clockedIn': false,
       'email': _emailController.text,
       'phoneNumber': _phoneController.text,
       'facebook': _facebookController.text,
       'userType': _userTypeController.text,
       'permissions': _permissions,
-      "activityLogs": [
-        {
-          "createdAt": Timestamp.now(),
-        }
-      ]
     };
 
     try {
-      // Add the new employee to Firestore
-      // Add the new employee to the 'users' collection
-      DocumentReference userRef =
-          await FirebaseFirestore.instance.collection('users').add(newEmployee);
-
-// Prepare initial attendance document under 'attendance' collection
-      Map<String, dynamic> attendance = {
-        'attendance':
-            [], // Optional: This can be an empty list or can be removed
-      };
-
-// Add an initial attendance record to the 'attendance' collection
+      // Update existing employee
       await FirebaseFirestore.instance
-          .collection('attendance')
-          .doc(userRef.id)
-          .set(attendance);
-
-// Create a timestamp-based attendance document in the subcollection
-      Map<String, dynamic> clockInData = {
-        'clockInTime': Timestamp.now(), // Current timestamp for clock-in
-        'clockOutTime': null, // Null for initial clock-out
-        'status': 'clockedIn', // Initial status
-      };
-
-// Add the clock-in document to a subcollection named 'attendanceRecords'
-      await userRef
-          .collection('attendanceRecords') // Subcollection under user document
-          .doc(Timestamp.now()
-              .toDate()
-              .toIso8601String()) // Use current time as document ID
-          .set(clockInData);
-
+          .collection('users')
+          .doc(widget.employee.id)
+          .update(employeeData);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Employee added successfully')),
+        const SnackBar(content: Text('Employee updated successfully')),
       );
       Navigator.of(context).pushReplacementNamed('/home');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding employee: $e')),
+        SnackBar(content: Text('Error updating employee: $e')),
       );
     }
   }
@@ -339,7 +316,7 @@ class _AddNewEmployeeState extends State<AddNewEmployee> {
                                       setState(() {
                                         _isChanged = false; // Disable button
                                       });
-                                      await _addEmployee();
+                                      await _updateEmployee();
                                     }
                                   }
                                 : null,
@@ -353,7 +330,7 @@ class _AddNewEmployeeState extends State<AddNewEmployee> {
                               shadowColor: Colors.black.withOpacity(0.25),
                             ),
                             child: const Text(
-                              'Add',
+                              'Update',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -379,7 +356,7 @@ class _AddNewEmployeeState extends State<AddNewEmployee> {
               elevation: 0,
               centerTitle: true,
               title: const Text(
-                'Add New Employee',
+                'Update Employee',
                 style: TextStyle(color: Colors.black, fontSize: 12),
               ),
               toolbarHeight: 35, // Set the height to 35

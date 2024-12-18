@@ -1,0 +1,73 @@
+class Product {
+  final String id;
+  final String category;
+  final String sku;
+  final String description;
+  final double price;
+  final bool trackProduction;
+  final List<IngredientItem> ingredients;
+
+  Product({
+    required this.id,
+    required this.category,
+    required this.sku,
+    required this.description,
+    required this.price,
+    required this.trackProduction,
+    required this.ingredients,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'category': category,
+      'sku': sku,
+      'description': description,
+      'price': price,
+      'trackProduction': trackProduction,
+      'ingredients': ingredients.map((i) => i.toMap()).toList(),
+    };
+  }
+
+  factory Product.fromMap(Map<String, dynamic> map) {
+    return Product(
+      id: map['id'] ?? '',
+      category: map['category'] ?? '',
+      sku: map['sku'] ?? '',
+      description: map['description'] ?? '',
+      price: (map['price'] ?? 0).toDouble(),
+      trackProduction: map['trackProduction'] ?? false,
+      ingredients: (map['ingredients'] as List? ?? [])
+          .map((i) => IngredientItem.fromMap(i))
+          .toList(),
+    );
+  }
+}
+
+class IngredientItem {
+  final String name;
+  final double quantity;
+  final String unit;
+
+  IngredientItem({
+    required this.name,
+    required this.quantity,
+    required this.unit,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'quantity': quantity,
+      'unit': unit,
+    };
+  }
+
+  factory IngredientItem.fromMap(Map<String, dynamic> map) {
+    return IngredientItem(
+      name: map['name'] ?? '',
+      quantity: (map['quantity'] ?? 0).toDouble(),
+      unit: map['unit'] ?? '',
+    );
+  }
+}

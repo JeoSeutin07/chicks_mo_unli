@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chicks_mo_unli/pages/auth_page.dart';
 import 'package:chicks_mo_unli/pages/Profile/clockin_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:chicks_mo_unli/pages/Profile/widgets/setup_account.dart';
+import 'package:chicks_mo_unli/pages/Owner/widgets/setup_account.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ClockInSection extends StatelessWidget {
