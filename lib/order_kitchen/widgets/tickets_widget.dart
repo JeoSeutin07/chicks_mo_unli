@@ -455,7 +455,9 @@ class OrderTicket extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: const Color.fromRGBO(251, 214, 99, 1),
+        color: isSelected
+            ? const Color.fromRGBO(251, 214, 99, 1) // Selected color
+            : const Color.fromRGBO(255, 248, 148, 0.98), // Unselected color
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
