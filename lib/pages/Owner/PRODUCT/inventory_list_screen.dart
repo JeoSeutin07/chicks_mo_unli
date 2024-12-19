@@ -4,7 +4,7 @@ import 'inventory_category_card.dart';
 import 'services/firebase_services.dart';
 import 'edit_inventory_screen.dart';
 
-class InventoryListScreen extends StatelessWidget {
+class ProductListScreen extends StatelessWidget {
   final FirebaseService _firebaseService = FirebaseService();
 
   @override

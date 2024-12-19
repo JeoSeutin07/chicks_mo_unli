@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'models/products.dart';
 import 'services/firebase_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditInventoryItemScreen extends StatefulWidget {
   final Product? product;
@@ -146,22 +147,10 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
               },
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _categoryController,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter category';
-                }
-                return null;
-              },
-            ),
+            _CategoryTypeAhead(controller: _categoryController),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Available'),
+              title: const Text('Available '),
               value: _available,
               onChanged: (bool value) {
                 setState(() {
@@ -204,5 +193,90 @@ class _EditInventoryItemScreenState extends State<EditInventoryItemScreen> {
         ),
       ),
     );
+  }
+}
+
+class _CategoryTypeAhead extends StatelessWidget {
+  final TextEditingController controller;
+
+  const _CategoryTypeAhead({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<String>>(
+      future: _fetchCategories(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const CircularProgressIndicator();
+        }
+        return Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return const Iterable<String>.empty();
+            }
+            return snapshot.data!.where((String option) {
+              return option.contains(textEditingValue.text.toLowerCase());
+            });
+          },
+          onSelected: (String selection) {
+            controller.text = selection;
+          },
+          fieldViewBuilder: (BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted) {
+            return TextFormField(
+              controller: fieldTextEditingController,
+              focusNode: fieldFocusNode,
+              decoration: const InputDecoration(
+                labelText: 'Category',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter category';
+                }
+                return null;
+              },
+            );
+          },
+          optionsViewBuilder: (BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4.0,
+                child: Container(
+                  color: Color(0x80FFF894), // 0x80 is the hex for 0.5 opacity
+                  constraints: BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(8.0),
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final String option = options.elementAt(index);
+                      return GestureDetector(
+                        onTap: () {
+                          onSelected(option);
+                        },
+                        child: ListTile(
+                          title: Text(option),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<List<String>> _fetchCategories() async {
+    final snapshot = await FirebaseFirestore.instance.collection('menu').get();
+    return snapshot.docs.map((doc) => doc.id).toList();
   }
 }

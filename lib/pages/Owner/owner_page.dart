@@ -1,3 +1,4 @@
+import 'package:chicks_mo_unli/pages/Owner/INVENTORY/inventory_screen.dart';
 import 'package:chicks_mo_unli/pages/Owner/PRODUCT/inventory_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'widgets/sales_graph.dart';
@@ -8,7 +9,6 @@ import 'widgets/metric_button.dart';
 import 'widgets/inventory_crud_page.dart';
 import 'EMPLOYEE/employee_crud_page.dart';
 import 'widgets/reports_page.dart';
-import 'package:chicks_mo_unli/pages/Owner/PRODUCT/inventory_list_screen.dart';
 
 void main() => runApp(MaterialApp(home: OwnerDashboard()));
 
@@ -108,10 +108,10 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
         );
         break;
       case 'Inventory':
-        targetPage = InventoryPage();
+        targetPage = InventoryScreen();
         break;
       case 'Products':
-        targetPage = InventoryListScreen();
+        targetPage = ProductListScreen();
         break;
       case 'Employees':
         targetPage = EmployeeListScreen();

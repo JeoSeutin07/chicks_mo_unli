@@ -19,6 +19,7 @@ class InventoryItemCard extends StatelessWidget {
   void _showBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Color(0xFFFFF3CB),
       builder: (BuildContext context) {
         return Container(
           padding: EdgeInsets.all(16),
