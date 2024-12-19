@@ -88,9 +88,7 @@ class _InventoryTrackerState extends State<InventoryTracker> {
           ),
           Expanded(
             child: Container(
-
               color: Color(0xFFFFF894),
-              padding: EdgeInsets.all(10),
               child: inventoryItems.isEmpty
                   ? Center(child: CircularProgressIndicator())
                   : ListView.builder(
