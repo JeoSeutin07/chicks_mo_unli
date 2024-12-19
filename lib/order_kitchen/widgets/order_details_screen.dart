@@ -186,7 +186,8 @@ class OrderDetailsScreen extends StatelessWidget {
                 if (order.items.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Cannot send an empty order to the kitchen.'),
+                      content:
+                          Text('Cannot send an empty order to the kitchen.'),
                     ),
                   );
                 } else {
@@ -214,7 +215,7 @@ class OrderDetailsScreen extends StatelessWidget {
           const SizedBox(height: 7),
           Center(
             child: ElevatedButton(
-              onPressed: onRefill,
+              onPressed: () => _handleRefill(context),
               child: const Text(
                 'Refill',
                 style: TextStyle(
@@ -236,6 +237,11 @@ class OrderDetailsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _handleRefill(BuildContext context) {
+    onRefill();
+    Navigator.pop(context);
   }
 
   void showFlavorDialog(BuildContext context, String flavor) {

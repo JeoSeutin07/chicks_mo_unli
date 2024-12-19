@@ -48,6 +48,7 @@ class QueueTabContent extends StatelessWidget {
                       flavors: item.flavors, // Add this line
                     ))
                 .toList(),
+            drinks: order.drinks, // Add this line
             onServe: () {
               onServeOrder(order);
             },
@@ -65,6 +66,7 @@ class OrderCard extends StatelessWidget {
   final String tableNumber;
   final String orderTime;
   final List<OrderItem> items;
+  final List<String> drinks; // Add this line
   final VoidCallback onServe;
   final String orderType; // Ensure this line is present
 
@@ -75,6 +77,7 @@ class OrderCard extends StatelessWidget {
     required this.tableNumber,
     required this.orderTime,
     required this.items,
+    required this.drinks, // Add this line
     required this.onServe,
     required this.orderType, // Ensure this line is present
   }) : super(key: key);
@@ -211,6 +214,27 @@ class OrderCard extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(height: 7),
+          if (drinks.isNotEmpty) // Add this block
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Drinks:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                ...drinks.map((drink) => Text(
+                      drink,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                      ),
+                    )),
+              ],
+            ),
           const SizedBox(height: 7),
           Center(
             child: ElevatedButton(

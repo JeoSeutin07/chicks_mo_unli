@@ -8,12 +8,14 @@ class Order {
   final List<MenuItem> items;
   final DateTime timestamp;
   final String orderType;
+  final List<String> drinks; // Add this line
 
   Order({
     required this.tableNumber,
     required this.items,
     required this.timestamp,
     required this.orderType,
+    this.drinks = const [], // Add this line
   });
 }
 

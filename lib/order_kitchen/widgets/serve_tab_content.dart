@@ -40,8 +40,10 @@ class ServeTabContent extends StatelessWidget {
                 .map((item) => OrderItem(
                       name: item.title,
                       quantity: item.quantity,
+                      flavors: item.flavors, // Add this line
                     ))
                 .toList(),
+            drinks: order.drinks, // Add this line
             onAddToOrder: () => onAddToOrder(order),
             onCheckOut: () => onCheckOut(order),
             orderType: order.orderType, // Add this line
@@ -58,6 +60,7 @@ class OrderCard extends StatelessWidget {
   final String tableNumber;
   final String orderTime;
   final List<OrderItem> items;
+  final List<String> drinks; // Add this line
   final VoidCallback onAddToOrder;
   final VoidCallback onCheckOut;
   final String orderType; // Add this line
@@ -69,6 +72,7 @@ class OrderCard extends StatelessWidget {
     required this.tableNumber,
     required this.orderTime,
     required this.items,
+    required this.drinks, // Add this line
     required this.onAddToOrder,
     required this.onCheckOut,
     required this.orderType, // Add this line
@@ -190,6 +194,27 @@ class OrderCard extends StatelessWidget {
             },
           ),
           const SizedBox(height: 7),
+          if (drinks.isNotEmpty) // Add this block
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Drinks:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                ...drinks.map((drink) => Text(
+                      drink,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                      ),
+                    )),
+              ],
+            ),
+          const SizedBox(height: 7),
           Center(
             child: ElevatedButton(
               onPressed: onAddToOrder,
@@ -242,9 +267,11 @@ class OrderCard extends StatelessWidget {
 class OrderItem {
   final String name;
   final int quantity;
+  final List<String> flavors; // Add this line
 
   const OrderItem({
     required this.name,
     required this.quantity,
+    required this.flavors, // Add this line
   });
 }

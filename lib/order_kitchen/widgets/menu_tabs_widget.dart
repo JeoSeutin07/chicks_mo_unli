@@ -21,11 +21,12 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget>
   Order? currentOrder;
   late TabController _tabController;
   Map<Order, Stopwatch> orderTimers = {}; // Add this line
+  bool showRefillTab = false; // Add a boolean to track the visibility of the refill tab
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: showRefillTab ? 4 : 3, vsync: this); // Update the initState method
     tabViews = [
       MenuTabContent(
         onItemSelected: (item) {
@@ -106,6 +107,10 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget>
         onAddToOrder: addToOrder,
         onCheckOut: checkOut,
       ),
+      if (showRefillTab)
+        RefillTabContent(
+          // Add your refill tab content here
+        ),
     ];
   }
 
@@ -167,7 +172,11 @@ class _MenuTabsWidgetState extends State<MenuTabsWidget>
         onSendToKitchen: () {
           sendToKitchen(order);
         },
-        onRefill: () {},
+        onRefill: () {
+          setState(() {
+            showRefillTab = true; // Set the boolean to true
+          });
+        },
       ),
     );
   }
@@ -778,4 +787,13 @@ class OrderItem {
     required this.quantity,
     this.flavors = const [], // Add this line
   });
+}
+
+class RefillTabContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Refill Tab Content'),
+    );
+  }
 }
