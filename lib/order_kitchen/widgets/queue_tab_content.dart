@@ -46,6 +46,7 @@ class QueueTabContent extends StatelessWidget {
                       name: item.title,
                       quantity: item.quantity,
                       flavors: item.flavors, // Add this line
+                      drinkType: item.drinkType, // Add this line
                     ))
                 .toList(),
             onServe: () {
@@ -206,6 +207,19 @@ class OrderCard extends StatelessWidget {
                           ),
                         ),
                       ),
+                    if (items[index].drinkType != null &&
+                        items[index].drinkType!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Text(
+                          'Drink: ${items[index].drinkType}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'Inter',
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               );
@@ -243,10 +257,12 @@ class OrderItem {
   final String name;
   final int quantity;
   final List<String> flavors; // Add this line
+  final String? drinkType; // Add this line
 
   const OrderItem({
     required this.name,
     required this.quantity,
     this.flavors = const [], // Add this line
+    this.drinkType, // Add this line
   });
 }

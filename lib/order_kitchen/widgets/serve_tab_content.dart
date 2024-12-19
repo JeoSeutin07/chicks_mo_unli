@@ -22,8 +22,10 @@ class ServeTabContent extends StatelessWidget {
       itemCount: orders.length,
       itemBuilder: (context, index) {
         final order = orders[index];
-        final DateFormat dateFormat = DateFormat('MM/dd/yyyy hh:mm a'); // Define date format
-        final String formattedDate = dateFormat.format(order.timestamp); // Format the timestamp
+        final DateFormat dateFormat =
+            DateFormat('MM/dd/yyyy hh:mm a'); // Define date format
+        final String formattedDate =
+            dateFormat.format(order.timestamp); // Format the timestamp
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 5),
           decoration: BoxDecoration(
@@ -35,7 +37,8 @@ class ServeTabContent extends StatelessWidget {
             orderNumber: order.tableNumber.toString(),
             dateTime: formattedDate, // Use formatted date
             tableNumber: order.tableNumber.toString(),
-            orderTime: DateFormat('hh:mm a').format(order.timestamp), // Display time in 12-hour format
+            orderTime: DateFormat('hh:mm a')
+                .format(order.timestamp), // Display time in 12-hour format
             items: order.items
                 .map((item) => OrderItem(
                       name: item.title,

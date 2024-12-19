@@ -186,7 +186,8 @@ class OrderDetailsScreen extends StatelessWidget {
                 if (order.items.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Cannot send an empty order to the kitchen.'),
+                      content:
+                          Text('Cannot send an empty order to the kitchen.'),
                     ),
                   );
                 } else {
