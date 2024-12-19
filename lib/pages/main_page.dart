@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/navigation_bar.dart' as custom;
 import '../providers/auth_provider.dart';
-import '../pages/orders_kitchen_screen.dart'; // Import the OrdersKitchenScreen
 import 'Owner/owner_page.dart';
 import 'Cash_Flow/Cash_Flow.dart';
 import 'profile_page.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'auth_page.dart'; // Import AuthPage for navigation
 import '../widgets/header.dart';
+import 'package:chicks_mo_unli/order_kitchen/orders_kitchen_screen.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
